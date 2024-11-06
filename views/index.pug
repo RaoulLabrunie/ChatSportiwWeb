@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1 ExpressChatBot
+
+  p #{title}
+
+  #form 
+    form(action="/send", method="post")
+      input#uMsg(type="text", name="msg", placeholder="Type your message here...")
+      button#sendBtn(type="submit") Send
