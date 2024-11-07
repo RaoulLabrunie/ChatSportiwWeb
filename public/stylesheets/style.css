@@ -58,24 +58,10 @@ li.message .role {
 
 li.message .content {
   font-size: 1em;
+  background-color: #ccc;
+  border-radius: 0.25em;
   color: #333;
-  padding: 5px 0;
-}
-
-li.message.user .content {
-  background-color: #e1f5fe;
-  padding: 10px;
-  border-radius: 8px;
-  align-self: flex-end;
-  max-width: 75%;
-}
-
-li.message.bot .content {
-  background-color: #f1f1f1;
-  padding: 10px;
-  border-radius: 8px;
-  align-self: flex-start;
-  max-width: 75%;
+  padding: 5px 5px;
 }
 
 form {

@@ -98,13 +98,13 @@ async function trauccion(response, query, question) {
     Write in human way, just the response in the same language as the user asked the question.
     You will just put the name of the player or players and the link to the sportiw profile.
     It's very important not to put a link that is not a sportiw profile.
+    Format the response in a readable way.
     Do not answer if you don't know the answer.
+    And just write your answer dont comment anything else, just your output.
     SQL Query: <SQL>${query}</SQL>
     User question: ${question}
     SQL Response: ${response}
   `;
-
-  console.log(prompt);
   try {
     const chatCompletion = await getGroqChatTraduction(prompt);
     // Print the completion returned by the LLM.
@@ -148,6 +148,9 @@ async function getGroqChatTraduction(prompt) {
         },
       ],
       model: "mixtral-8x7b-32768",
+      temperature: 0.5,
+      top_p: 1,
+      stream: true,
     });
   } catch (error) {
     console.error("Error al obtener el esquema:", error);
@@ -185,6 +188,8 @@ router.post("/", async function (req, res) {
 
   //llamamos a la funcion getResponse que nos devuelve la respuesta final
   const response = await getResponse(message);
+
+  console.log({ role: "system", content: response });
 
   // devolvemos por pantalla la respuesta final
   res.json({ role: "system", content: response });

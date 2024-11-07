@@ -41,7 +41,6 @@ block content
 
             // Obtener el contenido en formato JSON
             const data = await response.json();
-
             // Mostrar la respuesta del bot en la interfaz
             addMessage(data.content, data.role);           
         } catch (error) {
