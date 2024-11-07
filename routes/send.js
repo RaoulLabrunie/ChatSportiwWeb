@@ -179,7 +179,7 @@ async function getResponse(message) {
   return finalResult;
 }
 
-router.post("/", async function (req, res, next) {
+router.post("/", async function (req, res) {
   //el mensaje del usuario sera el cuerpo del request
   const message = req.body.msg;
 
@@ -187,7 +187,7 @@ router.post("/", async function (req, res, next) {
   const response = await getResponse(message);
 
   // devolvemos por pantalla la respuesta final
-  res.render("index", { title: response });
+  res.json({ role: "system", content: response });
 });
 
 export default router;

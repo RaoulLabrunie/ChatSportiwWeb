@@ -1,8 +1,148 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+/* Diseño base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-a {
-  color: #00B7FF;
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2em;
+  color: #2a2a2a;
+  margin-bottom: 20px;
+}
+
+main {
+  background-color: #fff;
+  border-radius: 8px;
+  width: 800px;
+  height: 400px;
+  max-width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* Asegura que los elementos dentro de 'main' se apilen verticalmente */
+}
+
+ul#messages {
+  list-style-type: none;
+  margin: 0;
+  padding: 20px;
+  height: 300px;
+  overflow-y: auto;
+  flex-grow: 1;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+li.message {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+li.message .role {
+  font-weight: bold;
+  color: #555;
+}
+
+li.message .content {
+  font-size: 1em;
+  color: #333;
+  padding: 5px 0;
+}
+
+li.message.user .content {
+  background-color: #e1f5fe;
+  padding: 10px;
+  border-radius: 8px;
+  align-self: flex-end;
+  max-width: 75%;
+}
+
+li.message.bot .content {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 8px;
+  align-self: flex-start;
+  max-width: 75%;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  /* Cambiado a columna para alinear los elementos de formulario verticalmente */
+  padding: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+input[type="text"] {
+  width: 100%;
+  /* Hace que el input ocupe todo el ancho disponible */
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+
+input[type="text"]:focus {
+  border-color: #007bff;
+}
+
+button {
+  width: 100%;
+  /* Hace que el botón ocupe todo el ancho disponible */
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  /* Separa el botón del input */
+}
+
+button:disabled {
+  background-color: #cccccc;
+}
+
+button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+button:active:not(:disabled) {
+  background-color: #004085;
+}
+
+small {
+  font-size: 0.8em;
+  color: #888;
+  text-align: center;
+  padding: 10px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+li.message {
+  animation: fadeIn 0.5s ease-in-out;
 }

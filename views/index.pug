@@ -3,9 +3,63 @@ extends layout
 block content
   h1 ExpressChatBot
 
-  p #{title}
+  main
+    ul#messages
 
-  #form 
-    form(action="/send", method="post")
-      input#uMsg(type="text", name="msg", placeholder="Type your message here...")
-      button#sendBtn(type="submit") Send
+  form
+    input(type="text", name="msg", placeholder="Type your message here...", required)
+    button Send
+
+  template#msgTemplate
+    li.message
+      span.role 
+      p.content 
+
+  script.
+    const form = document.querySelector('form')
+    const input = document.querySelector('input')
+    const messagesContainer = document.querySelector('#messages')
+    const msgTemplate = document.querySelector('#msgTemplate')
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault()
+      const messageText = input.value.trim()
+      
+      if (messageText != '') {
+        addMessage(messageText, 'user')
+        input.value = ''
+
+        try {
+            // Enviar el mensaje al servidor usando fetch
+            const response = await fetch('/send', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ msg: messageText })
+            });
+
+            // Obtener el contenido en formato JSON
+            const data = await response.json();
+
+            // Mostrar la respuesta del bot en la interfaz
+            addMessage(data.content, data.role);           
+        } catch (error) {
+            console.error("Hubo un problema con la solicitud:", error);
+            addMessage("Error en la conexión con el servidor.", 'bot');
+        }
+        
+      }
+    })
+
+    function addMessage(text, sender) {
+      const clonedTemplate = msgTemplate.content.cloneNode(true)
+      const roleSpan = clonedTemplate.querySelector('.role')
+      const contentP = clonedTemplate.querySelector('.content')
+
+      roleSpan.textContent = sender === 'system' ? 'System' : 'Tú'
+      contentP.textContent = text
+
+      messagesContainer.appendChild(clonedTemplate)
+      messagesContainer.scrollTop = messagesContainer.scrollHeight
+    }
