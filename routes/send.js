@@ -1,4 +1,4 @@
-import express from "express"; //importamos el modulo express
+import express, { query } from "express"; //importamos el modulo express
 var router = express.Router(); //creamos un router
 import dotenv from "dotenv"; //importamos el modulo dotenv
 import mysql from "mysql2"; //importamos el modulo mysql
@@ -93,10 +93,20 @@ async function main(message) {
 }
 
 // funcion que nos traduce la query a lenguaje humano
-async function trauccion(message, query) {
-  const prompt = `You need to write the following prompt in a human way, be precise and reduce the text and format it to be clear. Take in count the question ${message} and here is the query from the database: ${query}`;
+async function trauccion(response, query, question) {
+  const prompt = `
+    Write in human way, just the response in the same language as the user asked the question.
+    You will just put the name of the player or players and the link to the sportiw profile.
+    It's very important not to put a link that is not a sportiw profile.
+    Do not answer if you don't know the answer.
+    SQL Query: <SQL>${query}</SQL>
+    User question: ${question}
+    SQL Response: ${response}
+  `;
+
+  console.log(prompt);
   try {
-    const chatCompletion = await getGroqChatCompletion(message, prompt);
+    const chatCompletion = await getGroqChatTraduction(prompt);
     // Print the completion returned by the LLM.
     return chatCompletion.choices[0]?.message?.content;
   } catch (error) {
@@ -120,7 +130,24 @@ async function getGroqChatCompletion(message, prompt) {
         },
       ],
       model: "llama3-8b-8192",
-      max_tokens: 8192,
+    });
+  } catch (error) {
+    console.error("Error al obtener el esquema:", error);
+    throw error;
+  }
+}
+
+// pregunta x a la ia, tanto la traduccion como la query
+async function getGroqChatTraduction(prompt) {
+  try {
+    return await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: prompt,
+        },
+      ],
+      model: "mixtral-8x7b-32768",
     });
   } catch (error) {
     console.error("Error al obtener el esquema:", error);
@@ -130,23 +157,25 @@ async function getGroqChatCompletion(message, prompt) {
 
 //funcion que ejecuta todas las funciones anteriores y devuelve una respuesta final que nos permite imprimir por pantalla
 async function getResponse(message) {
+  //SQL query
   const response = await main(message);
 
   // Hacemos un query con la respuesta de la IA
-  const [results] = await connection.query(response);
+  const [queryResults] = await connection.query(response);
 
-  //console.log(results);
+  // Unir cada resultado en una sola cadena, separando por nueva línea
+  const formattedResultsString = queryResults.map((player) => {
+    // Convertir cada objeto en una cadena clave: valor
+    return Object.entries(player) // Convertir el objeto en un array de pares [clave, valor]
+      .map(([key, value]) => `${key}: ${value}`) // Formatear cada par como 'clave: valor'
+      .join(", "); // Unir todos los pares en una sola cadena, separados por coma
+  });
 
-  const formattedResultsString = results
-    .map((player) => {
-      // Convertir cada objeto en una cadena clave: valor
-      return Object.entries(player) // Convertir el objeto en un array de pares [clave, valor]
-        .map(([key, value]) => `${key}: ${value}`) // Formatear cada par como 'clave: valor'
-        .join(", "); // Unir todos los pares en una sola cadena, separados por coma
-    })
-    .join("\n"); // Unir cada resultado en una sola cadena, separando por nueva línea
-
-  const finalResult = await trauccion(message, formattedResultsString);
+  const finalResult = await trauccion(
+    formattedResultsString,
+    response,
+    message
+  );
   return finalResult;
 }
 
