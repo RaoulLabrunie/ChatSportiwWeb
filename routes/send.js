@@ -32,7 +32,7 @@ router.post("/", async function (req, res) {
     {
       role: "system",
       content: `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
-      Based on the table schema below, write an SQL query that would answer the user's question.
+      Based on the table schema below and avoiding inventing new columns, write an SQL query that would answer the user's question.
       You will only write the SQL query do not wrap it in any other text, not even in backticks.
       Write in a single line as a string without any other text.
       The schema is:
@@ -83,6 +83,7 @@ router.post("/", async function (req, res) {
         +-----------+------+------+-----+---------+-------+
       <schema>
       Write only SQL and nothing else.
+      If the user ask por a specific player, you must return the link to the profile of that player.
       Example:
       Question: Give me 10 players who have played in NCAA wich height is higher than 2 meters and a free throw statistic greater than 50?
       SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, u.Height, pe.GameFreeThrowsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID WHERE pe.League LIKE '%NCAA%' AND u.Height > 200 AND pe.GameFreeThrowsStatistic > 50 ORDER BY pe.GameFreeThrowsStatistic DESC LIMIT 15;
