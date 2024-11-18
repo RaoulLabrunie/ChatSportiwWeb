@@ -1,28 +1,37 @@
 import express, { query } from "express"; //importamos el modulo express
 var router = express.Router(); //creamos un router
-import dotenv from "dotenv"; //importamos el modulo dotenv
-import mysql from "mysql2"; //importamos el modulo mysql
-import { Groq } from "groq-sdk"; //importamos el modulo groq
-dotenv.config();
+import dotenv from "dotenv";
+import mysql from "mysql2";
+import { ChatGroq } from "@langchain/groq";
 
-//nos conectamos a la base e datos
-const connection = mysql
-  .createPool({
-    //todos estos datos estan en el archivo .env
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-  }) //ponemos el .promise() para que nos devuelva una promesa
-  .promise();
+dotenv.config(); //configuramos el dotenv
 
-//le damos a la ia de groq la clave necesaria para funcionar
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+//creamos la conexion de la base de datos a la que posteriormente le haremos los queries
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+});
 
-//funcion que nos devuelve la respuesta de la ia
-async function main(message) {
-  const prompt = `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
+//nuevo llm que usara el usuario, en este caso llamamos llama3 que es un modelo de lenguaje de alta capacidad.
+const llm = new ChatGroq({
+  model: "llama3-70b-8192",
+  temperature: 0,
+  maxTokens: 8000,
+  maxRetries: 2,
+  // other params...
+});
+
+//obtenemos la peticion del usuario con su mensaje
+router.post("/", async function (req, res) {
+  const message = req.body.msg;
+  //obtenemos el sql query que va a ser enviado al modelo llama3
+  const aiMsg = await llm.invoke([
+    {
+      role: "system",
+      content: `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
       Based on the table schema below, write an SQL query that would answer the user's question.
       You will only write the SQL query do not wrap it in any other text, not even in backticks.
       Write in a single line as a string without any other text.
@@ -80,119 +89,31 @@ async function main(message) {
       Question: Give me the top 10 players.
       SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, u.Height, pe.GameFreeThrowsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID DESC LIMIT 10;
       Your turn.
-      SQL Query(hold the backsticks):
-  `;
-  try {
-    const chatCompletion = await getGroqChatCompletion(message, prompt);
-    // Print the completion returned by the LLM.
-    return chatCompletion.choices[0]?.message?.content;
-  } catch (error) {
-    console.error("Error al obtener el esquema:", error);
-    throw error;
-  }
-}
+      Always limit your response to 10 players or selects.
+      SQL Query(hold the backsticks):`,
+    },
+    { role: "user", content: `${message}` },
+  ]);
 
-// funcion que nos traduce la query a lenguaje humano
-async function trauccion(response, query, question) {
-  const prompt = `
-    Write in human way, just the response in the same language as the user asked the question.
-    You will just put the name of the player or players and the link to the sportiw profile.
-    It's very important not to put a link that is not a sportiw profile.
-    Format the response in a readable way.
-    Do not answer if you don't know the answer.
-    And just write your answer dont comment anything else, just your output.
-    SQL Query: <SQL>${query}</SQL>
-    User question: ${question}
-    SQL Response: ${response}
-  `;
-  try {
-    const chatCompletion = await getGroqChatTraduction(prompt);
-    // Print the completion returned by the LLM.
-    return chatCompletion.choices[0]?.message?.content;
-  } catch (error) {
-    console.error("Error al obtener el esquema:", error);
-    throw error;
-  }
-}
+  //obtenemos solo el contenido de la peticion
+  const query = await aiMsg.content;
 
-// pregunta x a la ia, tanto la traduccion como la query
-async function getGroqChatCompletion(message, prompt) {
-  try {
-    return await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: prompt,
-        },
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-      model: "llama3-8b-8192",
-    });
-  } catch (error) {
-    console.error("Error al obtener el esquema:", error);
-    throw error;
-  }
-}
+  //ejecutamos el query para tener el resultado de la base de datos
+  const queryResults = await db.promise().query(query);
 
-// pregunta x a la ia, tanto la traduccion como la query
-async function getGroqChatTraduction(prompt) {
-  try {
-    return await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: prompt,
-        },
-      ],
-      model: "mixtral-8x7b-32768",
-      temperature: 0.5,
-      top_p: 1,
-      stream: true,
-    });
-  } catch (error) {
-    console.error("Error al obtener el esquema:", error);
-    throw error;
-  }
-}
+  //pasamos a string la respuesta para poder traducirla a lenguaje humano
+  const string = JSON.stringify(queryResults[0]);
 
-//funcion que ejecuta todas las funciones anteriores y devuelve una respuesta final que nos permite imprimir por pantalla
-async function getResponse(message) {
-  //SQL query
-  const response = await main(message);
-
-  // Hacemos un query con la respuesta de la IA
-  const [queryResults] = await connection.query(response);
-
-  // Unir cada resultado en una sola cadena, separando por nueva línea
-  const formattedResultsString = queryResults.map((player) => {
-    // Convertir cada objeto en una cadena clave: valor
-    return Object.entries(player) // Convertir el objeto en un array de pares [clave, valor]
-      .map(([key, value]) => `${key}: ${value}`) // Formatear cada par como 'clave: valor'
-      .join(", "); // Unir todos los pares en una sola cadena, separados por coma
-  });
-
-  const finalResult = await trauccion(
-    formattedResultsString,
-    response,
-    message
-  );
-  return finalResult;
-}
-
-router.post("/", async function (req, res) {
-  //el mensaje del usuario sera el cuerpo del request
-  const message = req.body.msg;
-
-  //llamamos a la funcion getResponse que nos devuelve la respuesta final
-  const response = await getResponse(message);
-
-  console.log({ role: "system", content: response });
-
-  // devolvemos por pantalla la respuesta final
-  res.json({ role: "system", content: response });
+  //traducimos el query de la base de datos a lenguaje humano
+  const finalResult = await llm.invoke([
+    {
+      role: "system",
+      content: `Write in human way. Make a simple response for the user.Put the link to the profile of each player.Dont format the text in any way.
+      SQL response: ${string}`,
+    },
+  ]);
+  //enviamos el resultado al usuario
+  res.send(finalResult.content.toString());
 });
 
 export default router;

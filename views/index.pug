@@ -5,6 +5,9 @@ block content
 
   main
     ul#messages
+      li.message
+      span.role
+      p.content
 
   form
     input(type="text", name="msg", placeholder="Type your message here...", required)
@@ -22,34 +25,33 @@ block content
     const msgTemplate = document.querySelector('#msgTemplate')
 
     form.addEventListener('submit', async event => {
-      event.preventDefault()
-      const messageText = input.value.trim()
-      
+      event.preventDefault();
+      const messageText = input.value.trim();
+
       if (messageText != '') {
-        addMessage(messageText, 'user')
-        input.value = ''
+        addMessage(messageText, 'user');
+        input.value = '';
 
         try {
-            // Enviar el mensaje al servidor usando fetch
-            const response = await fetch('/send', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ msg: messageText })
-            });
+          // Enviar el mensaje al servidor usando fetch
+          const response = await fetch('/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ msg: messageText }),
+          });
 
-            // Obtener el contenido en formato JSON
-            const data = await response.json();
-            // Mostrar la respuesta del bot en la interfaz
-            addMessage(data.content, data.role);           
+          // Obtener el contenido como texto
+          const data = await response.text();
+          
+          // Mostrar la respuesta del bot en la interfaz
+          addMessage(data, 'system');           
         } catch (error) {
-            console.error("Hubo un problema con la solicitud:", error);
-            addMessage("Error en la conexión con el servidor.", 'bot');
+          console.error("Hubo un problema con la solicitud:", error);
+          addMessage("Error en la conexión con el servidor.", 'bot');
         }
-        
       }
-    })
+    });
+
 
     function addMessage(text, sender) {
       const clonedTemplate = msgTemplate.content.cloneNode(true)
