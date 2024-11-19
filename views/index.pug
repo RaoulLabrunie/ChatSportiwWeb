@@ -6,8 +6,8 @@ block content
   main
     ul#messages
       li.message
-      span.role
-      p.content
+        span.role
+        p.content
 
   form
     input(type="text", name="msg", placeholder="Type your message here...", required)
@@ -16,6 +16,7 @@ block content
   template#msgTemplate
     li.message
       span.role 
+      //- Para contenido HTML dinámico como los enlaces
       p.content 
 
   script.
@@ -42,9 +43,9 @@ block content
 
           // Obtener el contenido como texto
           const data = await response.text();
-          
-          // Mostrar la respuesta del bot en la interfaz
-          addMessage(data, 'system');           
+
+          // Mostrar la respuesta del bot como HTML (enlaces clicables)
+          addMessage(data, 'system', true);           
         } catch (error) {
           console.error("Hubo un problema con la solicitud:", error);
           addMessage("Error en la conexión con el servidor.", 'bot');
@@ -52,15 +53,22 @@ block content
       }
     });
 
-
-    function addMessage(text, sender) {
+    // Modificar addMessage para aceptar HTML
+    function addMessage(text, sender, isHtml = false) {
       const clonedTemplate = msgTemplate.content.cloneNode(true)
       const roleSpan = clonedTemplate.querySelector('.role')
       const contentP = clonedTemplate.querySelector('.content')
 
       roleSpan.textContent = sender === 'system' ? 'System' : 'Tú'
-      contentP.textContent = text
+      
+      // Si es HTML (como los enlaces), lo insertamos sin escapar
+      if (isHtml) {
+        contentP.innerHTML = text;
+      } else {
+        contentP.textContent = text;
+      }
 
       messagesContainer.appendChild(clonedTemplate)
+      
       messagesContainer.scrollTop = messagesContainer.scrollHeight
     }

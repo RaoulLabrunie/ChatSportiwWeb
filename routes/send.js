@@ -24,10 +24,11 @@ const llm = new ChatGroq({
   // other params...
 });
 
-//obtenemos la peticion del usuario con su mensaje
+//obtenemos la petición del usuario con su mensaje
 router.post("/", async function (req, res) {
   const message = req.body.msg;
-  //obtenemos el sql query que va a ser enviado al modelo llama3
+
+  //obtenemos el SQL query generado por el LLM
   const aiMsg = await llm.invoke([
     {
       role: "system",
@@ -90,31 +91,35 @@ router.post("/", async function (req, res) {
       Question: Give me the top 10 players.
       SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, u.Height, pe.GameFreeThrowsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID DESC LIMIT 10;
       Your turn.
-      Always limit your response to 10 players or selects.
+      Always limit your response to 10 if the user does not specify how many players he wants.
+      Do not repeat information.
+      If the user asks for a specific player, you must return the principal information of the player with the link to the profile of that player.
       SQL Query(hold the backsticks):`,
     },
     { role: "user", content: `${message}` },
   ]);
 
-  //obtenemos solo el contenido de la peticion
   const query = await aiMsg.content;
 
-  //ejecutamos el query para tener el resultado de la base de datos
+  //ejecutamos el query en la base de datos
   const queryResults = await db.promise().query(query);
 
-  //pasamos a string la respuesta para poder traducirla a lenguaje humano
-  const string = JSON.stringify(queryResults[0]);
+  //transformamos los resultados en un formato legible
+  const players = queryResults[0];
+  console.log(queryResults[0]);
+  //creamos una respuesta en HTML con los enlaces
+  const htmlResponse = players
+    .map(
+      (player) =>
+        `<li><a href="${player.link}" target="_blank">${player.Firstname} ${player.Lastname}</a></li>`
+    )
+    .join("");
 
-  //traducimos el query de la base de datos a lenguaje humano
-  const finalResult = await llm.invoke([
-    {
-      role: "system",
-      content: `Write in human way. Make a simple response for the user.Put the link to the profile of each player.Dont format the text in any way.
-      SQL response: ${string}`,
-    },
-  ]);
-  //enviamos el resultado al usuario
-  res.send(finalResult.content.toString());
+  //envolvemos los enlaces en una lista
+  const finalHtml = `<ul>${htmlResponse}</ul>`;
+
+  //enviamos la respuesta formateada
+  res.send(finalHtml);
 });
 
 export default router;
