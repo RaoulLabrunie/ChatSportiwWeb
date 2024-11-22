@@ -20,6 +20,10 @@ const db = mysql
   })
   .promise();
 
+const schema = await db.query(
+  "select column_name, data_type, table_name from information_schema.columns where table_schema = 'bjse1a360bfb50jy3voy' order by table_name;"
+);
+
 // Configuración del modelo de lenguaje
 const llm = new ChatGroq({
   model: "llama3-70b-8192",
@@ -41,56 +45,20 @@ async function generateSQLQuery(message) {
       ${history}
       The schema is:
       <schema>
-        Table users
-        +-----------------+------+------+-----+---------+-------+
-        | Field           | Type | Null | Key | Default | Extra |
-        +-----------------+------+------+-----+---------+-------+
-        | ID              | text | YES  |     | NULL    |       |
-        | Firstname       | text | YES  |     | NULL    |       |
-        | Lastname        | text | YES  |     | NULL    |       |
-        | Email           | text | YES  |     | NULL    |       |
-        | PreferredLocale | text | YES  |     | NULL    |       |
-        | BirthDate       | text | YES  |     | NULL    |       |
-        | Height          | text | YES  |     | NULL    |       |
-        +-----------------+------+------+-----+---------+-------+
-      
-        Table profile_experiences
-        +----------------------------+------+------+-----+---------+-------+
-        | Field                      | Type | Null | Key | Default | Extra |
-        +----------------------------+------+------+-----+---------+-------+
-        | ExperienceID               | text | YES  |     | NULL    |       |
-        | ClubName                   | text | YES  |     | NULL    |       |
-        | Game2pointsStatistic       | text | YES  |     | NULL    |       |
-        | Game3pointsStatistic       | text | YES  |     | NULL    |       |
-        | GameBlocksStatistic        | text | YES  |     | NULL    |       |
-        | GameEvaluationStatistic    | text | YES  |     | NULL    |       |
-        | GameFreeThrowsStatistic    | text | YES  |     | NULL    |       |
-        | GameGamesPlayedStatistic   | text | YES  |     | NULL    |       |
-        | GameInterceptionsStatistic | text | YES  |     | NULL    |       |
-        | GamePassesStatistic        | text | YES  |     | NULL    |       |
-        | GamePointsStatistic        | text | YES  |     | NULL    |       |
-        | GameReboundsStatistic      | text | YES  |     | NULL    |       |
-        | GameTimeStatistic          | text | YES  |     | NULL    |       |
-        | League                     | text | YES  |     | NULL    |       |
-        | ProfileID                  | text | YES  |     | NULL    |       |
-        | Season                     | text | YES  |     | NULL    |       |
-        +----------------------------+------+------+-----+---------+-------+
-
-        Table profile
-        +-----------+------+------+-----+---------+-------+
-        | Field     | Type | Null | Key | Default | Extra |
-        +-----------+------+------+-----+---------+-------+
-        | ProfileID | text | YES  |     | NULL    |       |
-        | userID    | text | YES  |     | NULL    |       |
-        +-----------+------+------+-----+---------+-------+
+        ${schema}
       <schema>
       Write only SQL and nothing else.
-      If the user ask por a specific player, you must return the link to the profile of that player.
       Example:
       Question: Give me 10 players who have played in NCAA wich height is higher than 2 meters and a free throw statistic greater than 50?
       SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, u.Height, pe.GameFreeThrowsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID WHERE pe.League LIKE '%NCAA%' AND u.Height > 200 AND pe.GameFreeThrowsStatistic > 50 ORDER BY pe.GameFreeThrowsStatistic DESC LIMIT 15;
       Question: Give me the top 10 players.
-      SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, u.Height, pe.GameFreeThrowsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID DESC LIMIT 10;
+      SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, u.Height, pe.Game3pointsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID DESC LIMIT 10;
+      Question: Im looking for the shortest player.
+      SQL Query: SELECT u.Firstname, u.Lastname, u.Height, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID ORDER BY u.Height LIMIT 1;
+      Question: Im looking for a player with a brilliant three point statistic.
+      SQL Query: SELECT DISTINCT u.Firstname, u.Lastname, pe.Game3pointsStatistic, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID WHERE pe.Game3pointsStatistic > 40 ORDER BY pe.Game3pointsStatistic DESC LIMIT 1;
+      Question: Im looking for a player between 200 and 210 with best pass statistic.
+      SQL Query:SELECT DISTINCT u.Firstname, u.Lastname, pe.GamePassesStatistic, u.Height, CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.Lastname, '.', u.Firstname), ' ', '%20'), '/', p.ProfileID) AS link FROM users u JOIN profile p ON u.ID = p.userID JOIN profile_experiences pe ON p.ProfileID = pe.ProfileID WHERE u.Height BETWEEN 200 AND 210 AND pe.GamePassesStatistic IS NOT NULL ORDER BY pe.GamePassesStatistic DESC LIMIT 10
       Your turn.
       Always limit your response to 10 if the user does not specify how many players he wants.
       Do not repeat information.
@@ -107,15 +75,21 @@ async function formatResponse(message, players) {
   const aiFriendlyWay = await llm.invoke([
     {
       role: "system",
-      content: `You will answer the user question in the same language the question was asked <question>${message}<question>.
+      content: `You will answer the user question in a friendly formal way.
       You must follow the next format: "<br> - <a href="player.link" target="_blank">player.Firstname player.Lastname</a>".
       you must format the answer using <br>. Example:
         "Here are the 10 players you requested: <br>
         - <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
         etc <br>
         etc <br>"
+      If the user asked for a specific info add it as a part of the answer.
+      Heres the user question: 
+      <question>${message}<question>.
+      Heres the result from the database: 
+      <sqlquery>${players}</sqlquery>
+      If there is no result, say it in a friendly way.
       Remember to use the same language the question was asked.
-      Heres the result from the database: ${players}`,
+      `,
     },
   ]);
   return aiFriendlyWay.content.trim();
@@ -127,14 +101,19 @@ router.post("/", async (req, res) => {
   history.push("user: " + message);
 
   try {
-    // Generar la consulta SQL
-    const query = await generateSQLQuery(message);
-
+    const query = await generateSQLQuery(message, schema[0]);
+    console.log(query);
     // Ejecutar la consulta en la base de datos
-    const [queryResults] = await db.query(query);
+    let [queryResults] = await db.query(query);
 
-    if (!queryResults.length) {
-      return res.send("No results found");
+    //si la longitud de la consulta es 0 significa que no hay resultados, esto puede deberse a un error sql asi que repetiremos la consulta para asegurarnos
+    if (queryResults.length === 0) {
+      // Generar la consulta SQL
+      const query = await generateSQLQuery(message, schema[0]);
+      // Ejecutar la consulta en la base de datos
+      let [queryResults] = await db.query(query);
+
+      return queryResults;
     }
 
     // Transformar resultados y generar respuesta amigable
