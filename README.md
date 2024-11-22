@@ -1,12 +1,12 @@
 # Welcome to my project!
 
-### It allows users to make questions about a database of your choice and using a prmpt and the schema of the database it will generate a SQL query to answer the question.
+### It allows users to make questions about a database of your choice to a llm and using a prompt and the schema of the database it will generate a SQL query to answer the question, the program will execute the query to the database.
 
 ### Another chat bot will translate the SQL result in a human way and in the same language of the question.
 
 ### It's important to understand that you must modify the prompt to match your specific needs.
 
-### The chatbot is powered by LangChain and uses the ChatGroq model(llama3-70b-8192) to generate the SQL query.
+### The chatbot is powered by LangChain and uses the ChatGroq model(llama3-70b-8192) to generate the SQL query, though you can use any other model you want.
 
 ## Features
 
