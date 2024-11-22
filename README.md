@@ -32,7 +32,7 @@ npm install
 3. Configure the database connection and the LLM api key in the `.env` file:
 
 ```
-groq_api_key=your_api_key
+GROQ_API_KEY=your_api_key
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=root
