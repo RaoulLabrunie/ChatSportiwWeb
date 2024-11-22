@@ -62,3 +62,16 @@ The server will respond with a list of players that match the query:
 Heres the result from the database:
 [{"Firstname":"firstname","Lastname":"lastname","Height":2.0,"GameFreeThrowsStatistic":50,"link":"https://sportiw.com/en/athletes/firstname%20lastname/bjse1a360bfb50jy3voy/"}]
 ```
+
+Then another chatbot will translate the result in a human way:
+
+```
+Heres the result from the database:
+[{"Firstname":"firstname","Lastname":"lastname","Height":2.0,"GameFreeThrowsStatistic":50,"link":"https://sportiw.com/en/athletes/firstname%20lastname/bjse1a360bfb50jy3voy/"}]
+Here is the result in english:
+[{"Firstname":"firstname","Lastname":"lastname","Height":2.0,"GameFreeThrowsStatistic":50,"link":"https://sportiw.com/en/athletes/firstname%20lastname/bjse1a360bfb50jy3voy/"}]
+And here is the result in spanish:
+[{"Firstname":"firstname","Lastname":"lastname","Height":2.0,"GameFreeThrowsStatistic":50,"link":"https://sportiw.com/en/athletes/firstname%20lastname/bjse1a360bfb50jy3voy/"}]
+
+I hope you find this information useful.
+```
