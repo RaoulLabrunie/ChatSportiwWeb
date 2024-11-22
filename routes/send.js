@@ -7,6 +7,7 @@ dotenv.config();
 
 const router = express.Router();
 
+//creamos la variable que gestionara el historial de cada sesión
 let history = [];
 
 // Configuración de la conexión a la base de datos
@@ -20,9 +21,11 @@ const db = mysql
   })
   .promise();
 
+//obtenemos el esquema de la base de datos
 const schema = await db.query(
   "select column_name, data_type, table_name from information_schema.columns where table_schema = 'bjse1a360bfb50jy3voy' order by table_name;"
 );
+console.log(schema);
 
 // Configuración del modelo de lenguaje
 const llm = new ChatGroq({
@@ -38,12 +41,13 @@ async function generateSQLQuery(message) {
     {
       role: "system",
       content: `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
-      Based on the table schema below and avoiding inventing new columns, write an SQL query that would answer the user's question.
+      Based on the table schema below, write an SQL query that would answer the user's question.
       You will only write the SQL query do not wrap it in any other text, not even in backticks.
-      Write in a single line as a string without any other text.
       Take into acount the history of the conversation:
-      ${history}
-      The schema is:
+      <history>
+        ${history}
+      </history>
+      This is the schema of the tables, you must use it to write the SQL query:
       <schema>
         ${schema}
       <schema>
@@ -76,12 +80,12 @@ async function formatResponse(message, players) {
     {
       role: "system",
       content: `You will answer the user question in a friendly formal way.
-      You must follow the next format: "<br> - <a href="player.link" target="_blank">player.Firstname player.Lastname</a>".
-      you must format the answer using <br>. Example:
-        "Here are the 10 players you requested: <br>
+      You must follow the next format: "- <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>".
+      You must format the answer using <br>. Example:
+        Here are the 10 players you requested: <br>
         - <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
         etc <br>
-        etc <br>"
+        etc <br>
       If the user asked for a specific info add it as a part of the answer.
       Heres the user question: 
       <question>${message}<question>.
@@ -100,6 +104,7 @@ router.post("/", async (req, res) => {
   const { msg: message } = req.body;
   history.push("user: " + message);
 
+  //intentamos ejecutar la consulta en la base de datos en caso de que de error se informara al usuario
   try {
     const query = await generateSQLQuery(message, schema[0]);
     console.log(query);

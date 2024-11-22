@@ -1,6 +1,12 @@
-Welcome to my project!
+# Welcome to my project!
 
-This is a simple chatbot built with Node.js, Express, and LangChain.
+### It allows users to make questions about a database of your choice and using a prmpt and the schema of the database it will generate a SQL query to answer the question.
+
+### Another chat bot will translate the SQL result in a human way and in the same language of the question.
+
+### It's important to understand that you must modify the prompt to match your specific needs.
+
+### The chatbot is powered by LangChain and uses the ChatGroq model(llama3-70b-8192) to generate the SQL query.
 
 ## Features
 
