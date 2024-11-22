@@ -13,19 +13,19 @@ This is a simple chatbot built with Node.js, Express, and LangChain.
 
 1. Clone the repository:
 
-```bash
+```
 git clone https://github.com/raull/ExpressChatBot.git
 ```
 
 2. Install dependencies:
 
-```bash
+```
 npm install
 ```
 
 3. Configure the database connection and the LLM api key in the `.env` file:
 
-```bash
+```
 groq_api_key=your_api_key
 DB_HOST=localhost
 DB_USER=root
@@ -36,7 +36,7 @@ DB_PORT=3306
 
 4. Start the server:
 
-```bash
+```
 npm start
 ```
 
