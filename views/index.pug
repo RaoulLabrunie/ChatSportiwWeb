@@ -46,7 +46,7 @@ block content
           addMessage(data, 'system', true);           
         } catch (error) {
           console.error("Hubo un problema con la solicitud:", error);
-          addMessage("Error en la conexión con el servidor.", 'bot');
+          addMessage("Error en la conexión con el servidor. Reintentalo en unos segundos.", 'bot');
         }
       }
     });
