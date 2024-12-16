@@ -13,7 +13,7 @@ const llm = new ChatGroq({
 
 // Función para generar consultas SQL desde el LLM
 async function getInfoFromDB(message, schema, history) {
-  const aiMsg = await llm.invoke([
+  const aiSQLExpert = await llm.invoke([
     {
       role: "system",
       content: `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
@@ -47,11 +47,11 @@ async function getInfoFromDB(message, schema, history) {
     },
     { role: "user", content: message },
   ]);
-  return aiMsg.content.trim();
+  return aiSQLExpert.content.trim();
 }
 
 // Función para generar respuesta amigable al usuario
-async function formatHumanFriendlyWay(message, players) {
+async function getHumanFriendlyWay(message, players) {
   const aiFriendlyWay = await llm.invoke([
     {
       role: "system",
@@ -76,29 +76,30 @@ async function formatHumanFriendlyWay(message, players) {
 export async function main(message, schema, history) {
   //metemos el mensaje en el historial como pregunta del usuario
   history.push("user: " + message);
+
   // Generar la consulta SQL
   const query = await getInfoFromDB(message, schema[0], history);
-  console.log(query);
+  console.log(query); //imprimimos la consulta generada (esto solo esta para poder leer si el query esta bien hechgo y errores en produccion)
+
   // Ejecutar la consulta en la base de datos
   let [queryResults] = await db.query(query);
 
   //si la longitud de la consulta es 0 significa que no hay resultados, esto puede deberse a un error sql asi que repetiremos la consulta para asegurarnos
   if (queryResults.length === 0) {
-    // Generar la consulta SQL para recuperar los datos de la base de datos
     const query = await getInfoFromDB(message, schema[0]);
-    // Ejecutar la consulta en la base de datos
     let [queryResults] = await db.query(query);
-
     return queryResults;
   }
 
-  // Transformar resultados y generar respuesta amigable
-  const players = JSON.stringify(queryResults);
+  // Transformar resultados y generar respuesta en formato string, esto se debe a que llm no puede procesar json
+  const queryFormated = JSON.stringify(queryResults);
+
   //ejecutamos la segunda funcion que genera la respuesta amigable
-  const formattedResponse = await formatHumanFriendlyWay(message, players);
-  // Enviar respuesta formateada en HTML
-  console.log(history);
-  //la respuesta final que nos proporciona esta funcion la añadimos como respuesta del sistema en el historial
+  const formattedResponse = await getHumanFriendlyWay(
+    message,
+    queryFormated
+  );
+
   history.push("system: " + formattedResponse);
   return formattedResponse;
 }

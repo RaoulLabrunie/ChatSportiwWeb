@@ -1,21 +1,31 @@
 extends layout
 
 block content
-  h1 ExpressChatBot
+  body
+    .container-fluid.d-flex.flex-column.vh-100.bg-light
+      //- Cabecera
+      .row.bg-primary.text-white.p-3
+        .col
+          h1.text-center.mb-0 Chatbot Interface
+      
+      //- Área de mensajes (contenedor expandible)
+      .row.flex-grow-1.overflow-auto.bg-white
+        .col
+          ul#messages.list-unstyled.p-3
+      
+      //- Formulario fijo en la parte inferior
+      .row.bg-light.py-3
+        .col
+          form.d-flex.align-items-center
+            input.form-control.me-2(type="text", name="msg", placeholder="Type your message here...", required)
+            button.btn.btn-primary(type="submit") Send
 
-  main
-    ul#messages
-      li.message
-
-  form
-    input(type="text", name="msg", placeholder="Type your message here...", required)
-    button Send
-
-  template#msgTemplate
-    li.message
-      span.role 
-      //- Para contenido HTML dinámico como los enlaces
-      p.content 
+    //- Template para mensajes
+    template#msgTemplate
+      li.message.mb-3
+        .d-flex
+          span.role.text-muted.me-2
+          p.content.m-0
 
   script.
     const form = document.querySelector('form')
@@ -46,7 +56,24 @@ block content
           addMessage(data, 'system', true);           
         } catch (error) {
           console.error("Hubo un problema con la solicitud:", error);
-          addMessage("Error en la conexión con el servidor. Reintentalo en unos segundos.", 'bot');
+          addMessage("Estamos trabajando en ello", 'bot');
+          try {
+            // Repetimos el envio del mensaje para ver si soluciona el problema
+            const response = await fetch('/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ msg: messageText }),
+            });
+
+            // Obtener el contenido como texto
+            const data = await response.text();
+
+            // Mostrar la respuesta del bot como HTML (enlaces clicables)
+            addMessage(data, 'system', true);
+          } catch (error) {
+            console.error("Hubo un problema con la solicitud:", error);
+            addMessage("Hubo un error con tu solicitud, intenta de nuevo.", 'bot');
+          }
         }
       }
     });
@@ -57,8 +84,8 @@ block content
       const roleSpan = clonedTemplate.querySelector('.role')
       const contentP = clonedTemplate.querySelector('.content')
 
-      roleSpan.textContent = sender === 'system' ? 'System' : 'Tú'
-      
+      roleSpan.textContent = sender === 'system' ? 'System' : 'user'
+
       // Si es HTML (como los enlaces), lo insertamos sin escapar
       if (isHtml) {
         contentP.innerHTML = text;
@@ -67,6 +94,7 @@ block content
       }
 
       messagesContainer.appendChild(clonedTemplate)
-      
+
       messagesContainer.scrollTop = messagesContainer.scrollHeight
     }
+

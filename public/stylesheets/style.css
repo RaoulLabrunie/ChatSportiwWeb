@@ -1,134 +1,40 @@
-/* Diseño base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+ ul#messages {
+   max-height: calc(100% - 60px);
+   /* Ajusta la altura en función del formulario y cabecera */
+ }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f7f6;
-  color: #333;
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  padding: 20px;
-}
+ li.message {
+   padding: 8px 12px;
+   border-radius: 10px;
+ }
 
-h1 {
-  font-size: 2em;
-  color: #2a2a2a;
-  margin-bottom: 20px;
-}
+ li.message .role {
+   font-size: 0.85rem;
+   font-weight: bold;
+ }
 
-main {
-  background-color: #fff;
-  border-radius: 8px;
-  width: 800px;
-  height: 400px;
-  max-width: 100%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  /* Asegura que los elementos dentro de 'main' se apilen verticalmente */
-}
+ li.message .content {
+   font-size: 1rem;
+ }
 
-ul#messages {
-  list-style-type: none;
-  margin: 0;
-  padding: 20px;
-  height: 300px;
-  overflow-y: auto;
-  flex-grow: 1;
-  border-bottom: 1px solid #e0e0e0;
-}
+ li.message:nth-child(odd) {
+   background-color: #e9ecef;
+   /* Alterna colores para mensajes */
+ }
 
-li.message {
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-}
+ li.message:nth-child(even) {
+   background-color: #e9ecef;
+ }
 
-li.message .role {
-  font-weight: bold;
-  color: #555;
-}
+ li.message.user {
+   align-self: flex-end;
+   /* Alinea a la derecha */
+   text-align: right;
+ }
 
-li.message .content {
-  font-size: 1em;
-  background-color: #ccc;
-  border-radius: 0.25em;
-  color: #333;
-  padding: 5px 5px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  /* Cambiado a columna para alinear los elementos de formulario verticalmente */
-  padding: 15px;
-  border-top: 1px solid #e0e0e0;
-}
-
-input[type="text"] {
-  width: 100%;
-  /* Hace que el input ocupe todo el ancho disponible */
-  padding: 10px;
-  font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-}
-
-input[type="text"]:focus {
-  border-color: #007bff;
-}
-
-button {
-  width: 100%;
-  /* Hace que el botón ocupe todo el ancho disponible */
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 10px;
-  /* Separa el botón del input */
-}
-
-button:disabled {
-  background-color: #cccccc;
-}
-
-button:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-
-button:active:not(:disabled) {
-  background-color: #004085;
-}
-
-small {
-  font-size: 0.8em;
-  color: #888;
-  text-align: center;
-  padding: 10px;
-}
-
-/* Animaciones */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-li.message {
-  animation: fadeIn 0.5s ease-in-out;
-}
+ /* Mensajes del sistema */
+ li.message.system {
+   align-self: flex-start;
+   /* Alinea a la izquierda */
+   text-align: left;
+ }
