@@ -76,4 +76,5 @@ Then the js on the pug page will show the results following the format for an HT
 
 Here is an example of the output:
 
-![Screenshot 2024-11-22 184101](https://github.com/user-attachments/assets/2411a5a5-27c1-48e7-bfbd-4995e8aec211)
+![image](https://github.com/user-attachments/assets/f5fc0d3c-2c46-4915-9742-7fab8f929c25)
+
