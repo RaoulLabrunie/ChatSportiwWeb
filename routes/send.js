@@ -1,5 +1,5 @@
 import express from "express";
-import { main } from "../public/javascript/LLM.js";
+import { main, errorHandler } from "../public/javascript/LLM.js";
 import { getSchema } from "../public/javascript/DB.js";
 const router = express.Router();
 
@@ -14,8 +14,9 @@ router.post("/", async (req, res) => {
     const formattedResponse = await main(message, schema, history); //llamamos a la funcion main
     res.send(`<ul>${formattedResponse}</ul>`); //enviamos la respuesta formateada en HTML
   } catch (error) {
+    const errorAnswer = await errorHandler(message, error);
+    res.send(`<ul>${errorAnswer}</ul>`);
     console.error("Error procesando la consulta:", error);
-    res.status(500).send("Error procesando la consulta.");
   }
 });
 
