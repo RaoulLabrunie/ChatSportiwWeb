@@ -1,6 +1,6 @@
 import express from "express";
-import { main } from "./LLM.js";
-import { getSchema } from "./DB.js";
+import { main } from "../public/javascript/LLM.js";
+import { getSchema } from "../public/javascript/DB.js";
 const router = express.Router();
 
 let history = []; //variable que almacenara el mensaje que sera la request pero solo queremos el body
