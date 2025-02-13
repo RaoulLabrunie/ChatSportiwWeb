@@ -19,6 +19,7 @@ async function getInfoFromDB(message, schema, history) {
       content: `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
       Based on the table schema below, write an SQL query that would answer the user's question.
       You will only write the SQL query do not wrap it in any other text, not even in backticks.
+      If the user asks for some info you dont have in the schema, dont try to query it in the database it will bring errors and we dont want the user to see errors.
       Take into acount the history of the conversation:
       <history>
         ${history}
@@ -55,18 +56,24 @@ async function getHumanFriendlyWay(message, players) {
   const aiFriendlyWay = await llm.invoke([
     {
       role: "system",
-      content: `You will answer the user question in a friendly formal way.
-      You must follow the next format: "- <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>".
-      You must format the answer using <br>. Example:
-        Here are the 10 players you requested: <br>
-        - <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
-        ...
-      If the user asked for a specific info add it as a part of the answer.
-      Heres the user question: 
-      <question>${message}<question>.
-      Heres the result from the database: 
-      <sqlquery>${players}</sqlquery>
-      Remember to use the same language the question was asked.
+      content: `
+        You are an expert answering questions to users, you should always try to keep the user in the web and asking you questions.
+        If the sql result is not too long you can ask for more details in a super formal way, never say its the user fault and make sure you are not breaking the rules.
+        You will answer the user question in a friendly formal way.
+        Remove duplicated information. 
+        If you get an empty result, say that you dont found anything.
+        You will understand the user question, for example, if the user says thanks and you receive a list of players, you will not show the players and just say thanks.
+        You must follow the next format: "- <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>".
+        You must format the answer using <br>. Example:
+          Here are the 10 players you requested: <br>
+          - <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
+          ...
+        If the user asked for a specific info add it as a part of the answer.
+        Heres the user question: 
+        <question>${message}<question>.
+        Heres the result from the database: 
+        <sqlquery>${players}</sqlquery>
+        Remember to use the same language the question was asked.
       `,
     },
   ]);
@@ -84,21 +91,15 @@ export async function main(message, schema, history) {
   // Ejecutar la consulta en la base de datos
   let [queryResults] = await db.query(query);
 
-  //si la longitud de la consulta es 0 significa que no hay resultados, esto puede deberse a un error sql asi que repetiremos la consulta para asegurarnos
   if (queryResults.length === 0) {
-    const query = await getInfoFromDB(message, schema[0]);
-    let [queryResults] = await db.query(query);
-    return queryResults;
+    queryResults = "No results found";
   }
 
   // Transformar resultados y generar respuesta en formato string, esto se debe a que llm no puede procesar json
   const queryFormated = JSON.stringify(queryResults);
 
   //ejecutamos la segunda funcion que genera la respuesta amigable
-  const formattedResponse = await getHumanFriendlyWay(
-    message,
-    queryFormated
-  );
+  const formattedResponse = await getHumanFriendlyWay(message, queryFormated);
 
   history.push("system: " + formattedResponse);
   return formattedResponse;

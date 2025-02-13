@@ -15,14 +15,9 @@ const db = mysql
 
 async function getSchema() {
   const schema = await db.query(
-    `select column_name, data_type, table_name from information_schema.columns where table_schema = '${process.env.DB_NAME}' order by table_name;`
+    `select table_name, column_name, data_type from information_schema.columns where table_schema = '${process.env.DB_NAME}' order by table_name;`
   );
   return schema;
-}
-
-async function query(query) {
-  const result = await db.query(query);
-  return result;
 }
 
 export { db, getSchema };
