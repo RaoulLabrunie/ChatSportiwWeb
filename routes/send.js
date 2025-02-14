@@ -4,7 +4,14 @@ import { getSchema } from "../public/javascript/DB.js";
 const router = express.Router();
 
 let history = []; //variable que almacenara el mensaje que sera la request pero solo queremos el body
-const schema = await getSchema();
+const gettingSchema = await getSchema();
+
+//llm solo procesa json en string, por ende
+
+const schema = JSON.stringify(gettingSchema);
+
+console.log(schema);
+
 // Ruta principal
 router.post("/", async (req, res) => {
   const { msg: message } = req.body; //obtenemos el mensaje enviado por el usuario
@@ -21,3 +28,4 @@ router.post("/", async (req, res) => {
 });
 
 export default router;
+export { schema };

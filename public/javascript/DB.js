@@ -14,9 +14,27 @@ const db = mysql
   .promise();
 
 async function getSchema() {
-  const schema = await db.query(
-    `select table_name, column_name, data_type from information_schema.columns where table_schema = '${process.env.DB_NAME}' order by table_name;`
+  const [rows] = await db.query(
+    `SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '${process.env.DB_NAME}' ORDER BY TABLE_NAME;`
   );
+
+  // Agrupar resultados por tabla
+  const schema = rows.reduce((acc, column) => {
+    const tableName = column.TABLE_NAME;
+
+    if (!acc[tableName]) {
+      acc[tableName] = [];
+    }
+
+    acc[tableName].push({
+      columnName: column.COLUMN_NAME,
+      dataType: column.DATA_TYPE,
+      isNullable: column.IS_NULLABLE,
+    });
+
+    return acc;
+  }, {});
+
   return schema;
 }
 

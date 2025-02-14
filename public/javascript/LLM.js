@@ -1,5 +1,6 @@
 import { ChatGroq } from "@langchain/groq";
 import { db } from "./DB.js";
+import { schema } from "../../routes/send.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,15 +17,8 @@ async function getInfoFromDB(message, schema, history) {
   const template = `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
       Based on the table schema below, write an SQL query that would answer the user's question.
       You will only write the SQL query do not wrap it in any other text, not even in backticks.
+      Take into account the histoy of the conversation provided by the user.
       If the user asks for some info you dont have in the schema, dont try to query it in the database it will bring errors and we dont want the user to see errors.
-      Take into acount the history of the conversation:
-      <history>
-        ${history}
-      </history>
-      This is the schema of the tables, you must use it to write the SQL query:
-      <schema>
-        ${schema}
-      <schema>
       Write only SQL and nothing else.
       Example:
       Question: Give me 10 players who have played in NCAA wich height is higher than 2 meters and a free throw statistic greater than 50?
@@ -44,12 +38,28 @@ async function getInfoFromDB(message, schema, history) {
       Do not repeat information.
       If the user asks for a specific player, you must return the principal information of the player with the link to the profile of that player.
       SQL Query(hold the backsticks):`;
+
+  const userMessage = `
+    User message: '${message}'
+
+    History of the conversation:
+    <history>
+      ${history}
+    </history>
+
+    This is the schema of the tables. You must use it to write the SQL query:
+    <schema>
+      ${schema}
+    </schema>
+  `;
+
+  console.log(userMessage);
   const aiSQLExpert = await llm.invoke([
     {
       role: "system",
       content: template,
     },
-    { role: "user", content: message },
+    { role: "user", content: userMessage },
   ]);
   return aiSQLExpert.content.trim();
 }
@@ -88,8 +98,9 @@ async function solveErrorMessages(message, error) {
     {
       role: "system",
       content: `
-        You are an RRHH expert, theres been an error in the sql query but you wont say that, you will tell the customer that you cant provide the answer to his question in that moment.
+        There's been an error in the sql query but you wont say that, you will tell the customer that you cant provide the answer to his question in that moment.
         You will answer the user question in a friendly formal way.
+        You need to inform the customer that despite the error, you can still answer all his questions!
         Make sense with the user question to be more empathic.
         If the question is not about players or sports tell him that he might not be using the adecuate tool.
         You must format the answer using <br>. Example:
@@ -97,9 +108,8 @@ async function solveErrorMessages(message, error) {
           ...
         If the user asked for a specific info add it as a part of the answer.
         Heres the user question: 
-        <question>${message}<question>.
-        Heres the error:
-        <error>${error}</error>
+        <question>${message}<question>
+        
         Remember to use the same language the question was asked.
       `,
     },
@@ -112,7 +122,7 @@ export async function main(message, schema, history) {
   history.push("user: " + message);
 
   // Generar la consulta SQL
-  const query = await getInfoFromDB(message, schema[0], history);
+  const query = await getInfoFromDB(message, schema, history);
   console.log(query); //imprimimos la consulta generada (esto solo esta para poder leer si el query esta bien hechgo y errores en produccion)
 
   // Ejecutar la consulta en la base de datos
