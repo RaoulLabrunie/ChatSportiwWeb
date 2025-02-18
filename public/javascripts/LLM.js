@@ -13,7 +13,7 @@ const llm = new ChatGroq({
 });
 
 // Función para generar consultas SQL desde el LLM
-async function getInfoFromDB(message, schema) {
+async function getSqlFromAI(message, schema) {
   const prompt = `
     You are a SQL expert. You are working in collaboration with the website Sportiw and will include links to the profile of each player.
     
@@ -119,24 +119,56 @@ async function getHumanFriendlyWay(message, players) {
   return aiFriendlyWay.content.trim();
 }
 
-export async function main(message) {
+async function solveErrorMessages(message, error) {
+  const aiFriendlyWay = await llm.invoke([
+    {
+      role: "system",
+      content: `
+        There's been an error in the sql query but you wont say that, you will tell the customer that you cant provide the answer to his question in that moment.
+        You will answer the user question in a friendly formal way.
+        You need to inform the customer that despite the error, you can still answer all his questions!
+        Make sense with the user question to be more empathic.
+        If the question is not about players or sports tell him that he might not be using the adecuate tool.
+        You must format the answer using <br>. Example:
+          text <br>
+          ...
+        If the user asked for a specific info add it as a part of the answer.
+        Heres the user question: 
+        <question>${message}<question>
+        
+        Remember to use the same language the question was asked.
+      `,
+    },
+  ]);
+  return aiFriendlyWay.content.trim();
+}
+
+export async function main(message, schema, history) {
   // Generar la consulta SQL
-  const query = await getInfoFromDB(message, schema);
-  console.log(query); //imprimimos la consulta generada (esto solo esta para poder leer si el query esta bien hecho y errores en produccion)
+  const queryFromAI = await getSqlFromAI(message, schema, history);
+  console.log(query); //imprimimos la consulta generada (esto solo esta para poder leer si el query esta bien hechgo y errores en produccion)
 
   // Ejecutar la consulta en la base de datos
-  let [queryResults] = await db.query(query);
+  let [queryResults] = await db.query(queryFromAI);
 
   if (queryResults.length === 0) {
-    queryResults =
-      "No se encontro ninguna información en la base de datos, diselo al usuario de forma amigable. Y proponle seguir preguntando!";
+    queryResults = "No results found";
   }
 
-  // Los llm en este caso no soportan json, pasamos la respuesta a string
-  const queryFormated = JSON.stringify(queryResults);
+  // Transformar resultados y generar respuesta en formato string, esto se debe a que llm no puede procesar json
+  const queryJsonToString = JSON.stringify(queryResults);
 
-  //Generar la respuesta amigable
-  const formattedResponse = await getHumanFriendlyWay(message, queryFormated);
+  //ejecutamos la segunda funcion que genera la respuesta amigable
+  const humanFriendlyAnswer = await getHumanFriendlyWay(
+    message,
+    queryJsonToString
+  );
+  return humanFriendlyAnswer;
+}
 
-  return formattedResponse;
+export async function errorHandler(message, error) {
+  //ejecutamos la segunda funcion que genera la respuesta amigable
+  const errorAnswer = await solveErrorMessages(message, error);
+
+  return errorAnswer;
 }

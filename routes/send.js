@@ -1,24 +1,32 @@
 import express from "express";
-import { main } from "../public/javascripts/LLM.js";
-import { getSchema } from "../public/javascripts/DB.js";
+import { main, errorHandler } from "../public/javascript/LLM.js";
+import { getSchema } from "../public/javascript/DB.js";
+import { history } from "../public/javascript/history.js";
+import { addToHistory } from "../public/javascript/history.js";
 const router = express.Router();
 
-// llamamos a esta funcion de DB.js para obtener la estructura de la base de datos
-const gettingSchema = await getSchema();
-// Como sabemos que el LLM solo puede procesar JSON, pasamos la estructura de la base de datos a JSON
+const gettingSchema = await getSchema(); //Se encuentra en ../public/javascript/DB.js
+//al pasar el schema en JSON al LLM da error y el valo se pasa como nulo por ello pasamos el tipo a string
 const schema = JSON.stringify(gettingSchema);
 
 // Ruta principal
 router.post("/", async (req, res) => {
-  const { msg: message } = req.body; //obtenemos el mensaje enviado por el usuario
+  const message = req.body; //obtenemos el mensaje enviado por el usuario
+
   try {
-    const formattedResponse = await main(message, schema); //llamamos a main, alojada en LLM.js, para procesar el mensaje
-    res.send(`<ul>${formattedResponse}</ul>`); //reenviamos la respuesta ya formateada
+    const finalAnswerFromAI = await main(message, schema, history); //Esta funcion se encuentra en ../public/javascript/LLM.js
+    addToHistory(message, finalAnswerFromAI); //agregamos el mensaje al historial, esto se encuentra en ../public/javascript/history.js
+
+    res.send(`<ul>${finalAnswerFromAI}</ul>`); //enviamos la respuesta formateada en HTML
   } catch (error) {
     console.error("Error procesando la consulta:", error);
-    res.status(500).send("Error procesando la consulta.");
+
+    const errorAnswer = await errorHandler(message, error); //Esta funcion se encuentra en ../public/javascript/LLM.js
+    addToHistory(message, errorAnswer); //agregamos el mensaje al historial
+
+    res.send(`<ul>${errorAnswer}</ul>`);
   }
 });
 
 export default router;
-export { schema }; // exportamos la variable schema para que pueda ser utilizada en el archivo LLM.js
+export { schema };
