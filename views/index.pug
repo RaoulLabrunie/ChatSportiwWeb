@@ -1,4 +1,5 @@
 extends layout
+//- Se toma como base la plantilla layout.pug
 
 block content
   body
@@ -6,7 +7,7 @@ block content
       //- Cabecera
       .row.bg-primary.text-white.p-3
         .col
-          h1.text-center.mb-0 Chatbot Interface
+          h1.text-center.mb-0 Chatbot
       
       //- Área de mensajes (contenedor expandible)
       .row.flex-grow-1.overflow-auto.bg-white
@@ -20,7 +21,7 @@ block content
             input.form-control.me-2(type="text", name="msg", placeholder="Type your message here...", required)
             button.btn.btn-primary(type="submit") Send
 
-    //- Template para mensajes
+    //- Template para mensajes, se reutiliza para cada mensaje.
     template#msgTemplate
       li.message.mb-3
         .d-flex
@@ -33,6 +34,7 @@ block content
     const messagesContainer = document.querySelector('#messages')
     const msgTemplate = document.querySelector('#msgTemplate')
 
+    // Evento de envío de mensaje
     form.addEventListener('submit', async event => {
       event.preventDefault();
       const messageText = input.value.trim();
@@ -40,40 +42,21 @@ block content
       if (messageText != '') {
         addMessage(messageText, 'user');
         input.value = '';
-
+        
+        // se hace un fetch a la ruta /send para enviar el mensaje (send.js)
         try {
-          // Enviar el mensaje al servidor usando fetch
           const response = await fetch('/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ msg: messageText }),
           });
 
-          // Obtener el contenido como texto
           const data = await response.text();
 
           // Mostrar la respuesta del bot como HTML (enlaces clicables)
           addMessage(data, 'system', true);           
         } catch (error) {
           console.error("Hubo un problema con la solicitud:", error);
-          addMessage("Estamos trabajando en ello", 'bot');
-          try {
-            // Repetimos el envio del mensaje para ver si soluciona el problema
-            const response = await fetch('/send', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ msg: messageText }),
-            });
-
-            // Obtener el contenido como texto
-            const data = await response.text();
-
-            // Mostrar la respuesta del bot como HTML (enlaces clicables)
-            addMessage(data, 'system', true);
-          } catch (error) {
-            console.error("Hubo un problema con la solicitud:", error);
-            addMessage("Hubo un error con tu solicitud, intenta de nuevo.", 'bot');
-          }
         }
       }
     });
@@ -86,7 +69,6 @@ block content
 
       roleSpan.textContent = sender === 'system' ? 'System' : 'user'
 
-      // Si es HTML (como los enlaces), lo insertamos sin escapar
       if (isHtml) {
         contentP.innerHTML = text;
       } else {

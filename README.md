@@ -34,8 +34,8 @@ npm install
 ```
 GROQ_API_KEY=your_api_key
 DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=root
+DB_USER=user
+DB_PASSWORD=userPassword
 DB_NAME=expresschatbot
 DB_PORT=3306
 ```
