@@ -13,7 +13,7 @@ const llm = new ChatGroq({
 });
 
 // Función para generar consultas SQL desde el LLM
-async function getInfoFromDB(message, schema, history) {
+async function getSqlFromAI(message, schema, history) {
   const template = `You are a SQL expert. You are working in colaboration with the web sportiw and will put the links to the profile of each player.
       Based on the table schema below, write an SQL query that would answer the user's question.
       You will only write the SQL query do not wrap it in any other text, not even in backticks.
@@ -118,28 +118,26 @@ async function solveErrorMessages(message, error) {
 }
 
 export async function main(message, schema, history) {
-  //metemos el mensaje en el historial como pregunta del usuario
-  history.push("user: " + message);
-
   // Generar la consulta SQL
-  const query = await getInfoFromDB(message, schema, history);
+  const queryFromAI = await getSqlFromAI(message, schema, history);
   console.log(query); //imprimimos la consulta generada (esto solo esta para poder leer si el query esta bien hechgo y errores en produccion)
 
   // Ejecutar la consulta en la base de datos
-  let [queryResults] = await db.query(query);
+  let [queryResults] = await db.query(queryFromAI);
 
   if (queryResults.length === 0) {
     queryResults = "No results found";
   }
 
   // Transformar resultados y generar respuesta en formato string, esto se debe a que llm no puede procesar json
-  const queryFormated = JSON.stringify(queryResults);
+  const queryJsonToString = JSON.stringify(queryResults);
 
   //ejecutamos la segunda funcion que genera la respuesta amigable
-  const formattedResponse = await getHumanFriendlyWay(message, queryFormated);
-
-  history.push("system: " + formattedResponse);
-  return formattedResponse;
+  const humanFriendlyAnswer = await getHumanFriendlyWay(
+    message,
+    queryJsonToString
+  );
+  return humanFriendlyAnswer;
 }
 
 export async function errorHandler(message, error) {
