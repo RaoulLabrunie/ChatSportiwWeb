@@ -25,6 +25,7 @@ router.post("/", async (req, res) => {
     addToHistory(message, errorAnswer); //agregamos el mensaje al historial
 
     res.send(`<ul>${errorAnswer}</ul>`);
+    
   }
 });
 
