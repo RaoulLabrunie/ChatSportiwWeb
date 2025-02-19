@@ -1,8 +1,7 @@
 import express from "express";
 import { main, errorHandler } from "../public/javascripts/LLM.js";
 import { getSchema } from "../public/javascripts/DB.js";
-import { history } from "../public/javascripts/history.js"; //variable
-import { addToHistory } from "../public/javascripts/history.js"; //funcion
+import { history, addToHistory } from "../public/javascripts/history.js";
 const router = express.Router();
 
 const gettingSchema = await getSchema(); //Se encuentra en ../public/javascript/DB.js
