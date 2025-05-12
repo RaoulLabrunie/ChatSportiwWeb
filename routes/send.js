@@ -1,13 +1,8 @@
 import express from "express";
-<<<<<<< HEAD
 import { main, errorHandler } from "../src/chat/LLM.js";
 import { getSchema } from "../src/chat/DB.js";
 import { history, addToHistory } from "../src/chat/history.js";
-=======
-import { main, errorHandler } from "../public/javascripts/LLM.js";
-import { getSchema } from "../public/javascripts/DB.js";
-import { history, addToHistory } from "../public/javascripts/history.js";
->>>>>>> 04e8b4fe3739d7f3b36240f28fb639a9433ca72b
+
 const router = express.Router();
 
 const gettingSchema = await getSchema(); //Se encuentra en ../src/chat/javascript/DB.js
