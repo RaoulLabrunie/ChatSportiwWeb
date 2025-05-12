@@ -4,16 +4,24 @@ import { getLogin } from "../src/auth/DB2.js"; // adjust path as needed
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, cargo } = req.body;
 
   try {
     const valid = await getLogin(email, password);
-    if (valid) {
-      // If login is successful, you can create a session or do additional processing
-      // For example, if using express-session:
-      // req.session.user = { email };
 
-      // Send a success response that allows client-side redirection
+    console.log(valid);
+
+    if (valid === 1) {
+      return res.status(200).json({
+        message: "Login correcto sin cargo",
+        redirect: "/noChat",
+      });
+    } else if (valid === 2) {
+      return res.status(200).json({
+        message: "Login correcto",
+        redirect: "/chat",
+      });
+    } else if (valid === 3) {
       return res.status(200).json({
         message: "Login correcto",
         redirect: "/chat",

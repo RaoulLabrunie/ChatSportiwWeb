@@ -40,18 +40,27 @@ html(lang="en")
               .then(response => {
                 // Check the response status
                 if (response.ok) {
-                  // If successful, redirect to chat
-                  window.location.href = '/chat'
+                  return response.json();
                 } else {
-                  // If not successful, parse the error message
                   return response.json().then(data => {
-                    alert(data.message || 'Credenciales inválidas')
-                  })
+                    throw new Error(data.message || 'Credenciales inválidas')
+                  });
+                }
+              })
+              .then(data => {
+                // Log the received data for debugging
+                console.log('Login response:', data);
+                
+                // Redirect based on the received redirect path
+                if (data.redirect) {
+                  window.location.href = data.redirect;
+                } else {
+                  throw new Error('No redirect specified');
                 }
               })
               .catch(error => {
                 console.error('Error:', error)
-                alert('Error de conexión')
+                alert(error.message || 'Error de conexión')
               })
           } else {
             alert('Por favor, rellena todos los campos')

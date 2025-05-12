@@ -10,6 +10,7 @@ import usersRouter from "./routes/users.js";
 import sendRouter from "./routes/send.js";
 import authRouter from "./routes/auth.js";
 import chatRouter from "./routes/chat.js";
+import defaultRouter from "./routes/noChat.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,7 @@ app.use("/users", usersRouter);
 app.use("/send", sendRouter);
 app.use("/auth", authRouter);
 app.use("/chat", chatRouter);
+app.use("/noChat", defaultRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

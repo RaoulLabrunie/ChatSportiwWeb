@@ -21,7 +21,12 @@ async function getLogin(email, password) {
     [email, password]
   );
 
-  return rows.length > 0;
+  const importancia = rows[0].id_importancia;
+  if (rows.length > 0) {
+    return importancia;
+  } else {
+    return false;
+  }
 }
 
 export { db2, getLogin };

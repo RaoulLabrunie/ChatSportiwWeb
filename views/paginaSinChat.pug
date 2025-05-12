@@ -1,0 +1,81 @@
+extends layout
+
+block content
+  body
+    .container-fluid.d-flex.flex-column.vh-100.bg-light
+      //- Header
+      .row.bg-primary.text-white.p-3
+        .col
+          h1.text-center.mb-0 My Tech Blog
+
+      //- Main Content Area
+      .row.flex-grow-1.overflow-auto.bg-white
+        .col-md-8.offset-md-2.p-4
+          //- Featured Post
+          .card.mb-4
+            .card-header.bg-secondary.text-white
+              h2 Featured Post
+            .card-body
+              h3.card-title Exploring the Future of AI
+              p.card-text.text-muted By John Doe | Published on May 12, 2025
+              p.card-text 
+                | Artificial Intelligence continues to revolutionize industries, from healthcare to technology. 
+                | In this post, we dive deep into the latest advancements and their potential impact on our daily lives.
+              a.btn.btn-primary(href="#") Read More
+
+          //- Recent Posts Section
+          .row
+            .col-md-6.mb-4
+              .card.h-100
+                .card-header Web Development
+                .card-body
+                  h4.card-title JavaScript Frameworks in 2025
+                  p.card-text 
+                    | A comprehensive look at the most popular JavaScript frameworks 
+                    | and how they're shaping modern web development.
+                  .d-flex.justify-content-between.align-items-center
+                    small.text-muted By Sarah Smith
+                    a.btn.btn-sm.btn-outline-primary(href="#") Read
+
+            .col-md-6.mb-4
+              .card.h-100
+                .card-header Machine Learning
+                .card-body
+                  h4.card-title Neural Networks Explained
+                  p.card-text 
+                    | Breaking down the complex world of neural networks 
+                    | and their applications in modern technology.
+                  .d-flex.justify-content-between.align-items-center
+                    small.text-muted By Alex Johnson
+                    a.btn.btn-sm.btn-outline-primary(href="#") Read
+
+      //- Footer
+      .row.bg-dark.text-white.p-3
+        .col.text-center
+          p.mb-0 © 2025 Tech Insights Blog | All Rights Reserved
+          .social-links.mt-2
+            a.text-white.me-2(href="#") 
+              i.fab.fa-twitter
+            a.text-white.me-2(href="#") 
+              i.fab.fa-linkedin
+            a.text-white(href="#") 
+              i.fab.fa-github
+
+  //- Optional: Add some custom styles
+  style.
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .card-header {
+      font-weight: bold;
+    }
+    .social-links a {
+      font-size: 1.5rem;
+      transition: color 0.3s ease;
+    }
+    .social-links a:hover {
+      color: #61dafb !important;
+    }
+
+  //- Optional: Font Awesome for social icons
+  link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css")
