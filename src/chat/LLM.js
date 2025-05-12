@@ -71,7 +71,7 @@ async function getSqlFromAI(message, schema, history) {
     SQL Query:
   `;
 
-  const messageUser = `
+  const promptUser = `
     Message: '${message}'.
 
     This is the schema of the tables. You must use it to write the SQL query:
@@ -85,7 +85,7 @@ async function getSqlFromAI(message, schema, history) {
     </history>
   `;
 
-  console.log(messageUser.trim());
+  console.log(promptUser.trim());
 
   const aiSQLExpert = await llm.invoke([
     {
@@ -94,7 +94,7 @@ async function getSqlFromAI(message, schema, history) {
     },
     {
       role: "user",
-      content: messageUser.trim(),
+      content: promptUser.trim(),
     },
   ]);
 
@@ -103,10 +103,7 @@ async function getSqlFromAI(message, schema, history) {
 
 // Esta funcion traduce la respuesta de la base de datos en un texto amigable para el usuario
 async function getHumanFriendlyWay(message, players, history) {
-  const aiFriendlyWay = await llm.invoke([
-    {
-      role: "system",
-      content: `
+  const prompt = `
       You are an expert answering questions to users, you should always try to keep the user in the web and asking you questions.
       If the sql result is not too long you can ask for more details in a super formal way.
       You will answer the user question in a friendly formal way.
@@ -126,38 +123,44 @@ async function getHumanFriendlyWay(message, players, history) {
       Remember to use the same language the question was asked.
       Heres the history of the conversation:
       <history>${history}</history>
-      `,
+      `;
+  const aiFriendlyWay = await llm.invoke([
+    {
+      role: "system",
+      content: prompt.trim(),
     },
   ]);
   return aiFriendlyWay.content.trim();
 }
 
 async function solveErrorMessages(message, history) {
-  const aiFriendlyWay = await llm.invoke([
+  const prompt = `
+    There's been an error in the sql query but you wont say that, you will tell the customer that you cant provide the answer to his question in that moment.
+    You will answer the user question in a friendly formal way.
+    You need to inform the customer that despite the error, you can still answer all his questions!
+    Make sense with the user question to be more empathic.
+    If the question is not about players or sports tell him that he might not be using the adecuate tool.
+    You must format the answer using <br>. Example:
+      text <br>
+      ...
+    If the user asked for a specific info add it as a part of the answer.
+    Heres the user question: 
+    <question>${message}<question>
+    Heres the history of the conversation:
+    <history>${history}</history>
+    Remember to use the same language the question was asked.
+  `;
+  const aiSolveError = await llm.invoke([
     {
       role: "system",
-      content: `
-        There's been an error in the sql query but you wont say that, you will tell the customer that you cant provide the answer to his question in that moment.
-        You will answer the user question in a friendly formal way.
-        You need to inform the customer that despite the error, you can still answer all his questions!
-        Make sense with the user question to be more empathic.
-        If the question is not about players or sports tell him that he might not be using the adecuate tool.
-        You must format the answer using <br>. Example:
-          text <br>
-          ...
-        If the user asked for a specific info add it as a part of the answer.
-        Heres the user question: 
-        <question>${message}<question>
-
-        Here's the history of the conversation:
-        <history>${history}</history>
-        
-        Remember to use the same language the question was asked.
-      `,
+      content: prompt.trim(),
     },
   ]);
-  return aiFriendlyWay.content.trim();
+  return aiSolveError.content.trim();
 }
+
+// Main y errorHandler son las funciones principales que usaran las funciones anteriores, donde se encuentra la ejecucion del codigo.
+// Llamamos a estas funciones desde el archivo '../../routes/send.js'
 
 export async function main(message, schema, history) {
   // Generar la consulta SQL
@@ -176,10 +179,9 @@ export async function main(message, schema, history) {
   // Ejecutar la consulta en la base de datos
 
   if (queryResults.length === 0) {
-    queryResults = "No results found";
+    queryResults = "No results found"; // Podremos gestionar esto en getHumanFriendlyWay de forma que aunque no haya resultados, se muestre un mensaje amigable
   }
 
-  // Transformar resultados y generar respuesta en formato string, esto se debe a que llm no puede procesar json
   const queryJsonToString = JSON.stringify(queryResults);
 
   console.log(queryJsonToString);
@@ -190,6 +192,7 @@ export async function main(message, schema, history) {
     queryJsonToString,
     history
   );
+
   return humanFriendlyAnswer;
 }
 
