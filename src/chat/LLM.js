@@ -19,6 +19,8 @@ async function getSqlFromAI(message, schema, history) {
     Imagine someone ask for weight, if you don't have it in the schema then dont try to answer it.
     You will only write the SQL query, do not wrap it in any other text, not even in backticks.
 
+    ONLY use SELECT queries. Never include DELETE, INSERT, UPDATE, DROP, or any schema-changing SQL.
+
     You will pay special attention to the history of the conversation.
     
     Write only SQL and nothing else.
@@ -36,9 +38,9 @@ async function getSqlFromAI(message, schema, history) {
     ORDER BY eb.game_free_throws_statistic DESC 
     LIMIT 10;
 
-    Question: Give me some french players.
+    Question: Give me some french players under 25 years old.
     SQL Query:
-    SELECT DISTINCT u.first_name, u.last_name, u.height, eb.game_3points_statistic,
+    SELECT DISTINCT u.first_name, u.last_name, u.height, u.birth_date, eb.game_3points_statistic,
           CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
     FROM user u
     JOIN profiles p ON u.id = p.user_id
@@ -46,6 +48,7 @@ async function getSqlFromAI(message, schema, history) {
     JOIN nationality n ON u.id = n.user_id
     JOIN countries c ON n.country_id = c.id
     WHERE c.nationality = 'French' 
+    AND u.birth_date > DATE_SUB(CURDATE(), INTERVAL 25 YEAR)
     LIMIT 10;
 
     Question: Could you give me some female players.
@@ -105,7 +108,7 @@ async function getHumanFriendlyWay(message, players, history) {
       role: "system",
       content: `
       You are an expert answering questions to users, you should always try to keep the user in the web and asking you questions.
-      If the sql result is not too long you can ask for more details in a super formal way, never say its the user fault and make sure you are not breaking the rules.
+      If the sql result is not too long you can ask for more details in a super formal way.
       You will answer the user question in a friendly formal way.
       You will pay special attention to the history of the conversation.
       Remove duplicated information. 
@@ -159,8 +162,18 @@ async function solveErrorMessages(message, history) {
 export async function main(message, schema, history) {
   // Generar la consulta SQL
   const queryFromAI = await getSqlFromAI(message, schema, history);
+  console.log(queryFromAI);
+
+  let [queryResults] = "";
+
+  if (!validateSqlQuery(queryFromAI)) {
+    queryResults =
+      "La consulta no es valida, coniene comandos peligrosos o múltiples instrucciones. Informa al usuario de forma amable.";
+  } else {
+    queryResults = await db.query(queryFromAI);
+  }
+
   // Ejecutar la consulta en la base de datos
-  let [queryResults] = await db.query(queryFromAI);
 
   if (queryResults.length === 0) {
     queryResults = "No results found";
@@ -168,6 +181,8 @@ export async function main(message, schema, history) {
 
   // Transformar resultados y generar respuesta en formato string, esto se debe a que llm no puede procesar json
   const queryJsonToString = JSON.stringify(queryResults);
+
+  console.log(queryJsonToString);
 
   //ejecutamos la segunda funcion que genera la respuesta amigable
   const humanFriendlyAnswer = await getHumanFriendlyWay(
@@ -183,4 +198,70 @@ export async function errorHandler(message, error) {
   const errorAnswer = await solveErrorMessages(message, error);
 
   return errorAnswer;
+}
+
+function startsWithSelect(query) {
+  return query.trim().toUpperCase().startsWith("SELECT");
+}
+
+function containsForbiddenCommands(query) {
+  const forbiddenCommands = [
+    "DROP",
+    "DELETE",
+    "UPDATE",
+    "INSERT",
+    "TRUNCATE",
+    "ALTER",
+    "CREATE",
+    "REPLACE INTO",
+    "MERGE",
+    "GRANT",
+    "EXECUTE",
+    "CALL",
+  ];
+
+  for (let command of forbiddenCommands) {
+    if (query.toUpperCase().includes(command)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function containsMultipleQueries(query) {
+  const statements = query
+    .split(";")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+
+  return statements.length > 1; // Solo es inválido si hay más de una instrucción
+}
+
+function containsMaliciousComments(query) {
+  const forbiddenComments = ["--", "/*", "*/"];
+  return forbiddenComments.some((comment) => query.includes(comment));
+}
+
+function validateSqlQuery(query) {
+  if (!startsWithSelect(query)) {
+    console.log("La consulta debe comenzar con SELECT");
+    return false;
+  }
+
+  if (containsForbiddenCommands(query)) {
+    console.log("La consulta contiene comandos peligrosos");
+    return false;
+  }
+
+  if (containsMultipleQueries(query)) {
+    console.log("La consulta contiene múltiples instrucciones");
+    return false;
+  }
+
+  if (containsMaliciousComments(query)) {
+    console.log("La consulta contiene comentarios peligrosos");
+    return false;
+  }
+
+  return true; // La consulta es válida
 }

@@ -16,7 +16,7 @@ const db = mysql
 async function getSchema() {
   // Obtenemos la estructura de la base de datos para que el LLM pueda generar consultas SQL
   const [rows] = await db.query(
-    `SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '${process.env.DB_NAME}' ORDER BY TABLE_NAME;`
+    `SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '${process.env.DB_NAME}' ORDER BY TABLE_NAME;`
   );
 
   // Agrupar resultados por tabla
@@ -30,7 +30,6 @@ async function getSchema() {
     acc[tableName].push({
       columnName: column.COLUMN_NAME,
       dataType: column.DATA_TYPE,
-      isNullable: column.IS_NULLABLE,
     });
 
     return acc;

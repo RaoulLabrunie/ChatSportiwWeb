@@ -8,6 +8,8 @@ import logger from "morgan";
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
 import sendRouter from "./routes/send.js";
+import authRouter from "./routes/auth.js";
+import chatRouter from "./routes/chat.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +29,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/send", sendRouter);
+app.use("/auth", authRouter);
+app.use("/chat", chatRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
