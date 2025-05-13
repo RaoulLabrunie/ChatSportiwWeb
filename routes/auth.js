@@ -1,4 +1,5 @@
 import express from "express";
+import session from "express-session";
 import { getLogin } from "../src/auth/DB2.js"; // adjust path as needed
 
 const router = express.Router();
@@ -11,21 +12,13 @@ router.post("/login", async (req, res) => {
 
     console.log(valid);
 
-    if (valid === 1) {
+    if ([1, 2, 3].includes(valid)) {
       return res.status(200).json({
-        message: "Login correcto sin cargo",
+        message: "Login correcto",
         redirect: "/noChat",
       });
-    } else if (valid === 2) {
-      return res.status(200).json({
-        message: "Login correcto",
-        redirect: "/chat",
-      });
-    } else if (valid === 3) {
-      return res.status(200).json({
-        message: "Login correcto",
-        redirect: "/chat",
-      });
+      req.session.importancia = valid;
+      req.session.isLoggedIn = true;
     } else {
       // Send an unauthorized response
       return res.status(401).json({
@@ -35,7 +28,7 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({
-      message: "Error del servidor",
+      message: "Error login servidor",
     });
   }
 });
