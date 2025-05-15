@@ -7,14 +7,14 @@
 
 ## ✨ Overview
 
-**ExpressChatBot** transforms the way you interact with databases through natural language. The system:
+**ChatSportiwWeb** transforms the way you interact with databases through natural language. The system:
 
 1. 💬 Takes user questions about database content
 2. 🔄 Converts these questions to SQL queries using LLM technology
 3. ⚡ Executes the queries against your database
 4. 📊 Translates the results back into natural language responses
 
-Built on LangChain and ChatGroq (powered by llama3-70b-8192), ExpressChatBot brings the power of conversational AI to your data infrastructure. Customize with any compatible LLM of your choice.
+Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power of conversational AI to your data infrastructure. Customize with any compatible LLM of your choice.
 
 ## 🌟 Features
 
@@ -29,8 +29,8 @@ Built on LangChain and ChatGroq (powered by llama3-70b-8192), ExpressChatBot bri
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/raull/ExpressChatBot.git
-   cd ExpressChatBot
+   git clone https://github.com/raull/ChatSportiwWeb.git
+   cd ChatSportiwWeb
    ```
 
 2. **Install dependencies**:
@@ -47,7 +47,7 @@ Built on LangChain and ChatGroq (powered by llama3-70b-8192), ExpressChatBot bri
    DB_HOST=localhost
    DB_USER=user
    DB_PASSWORD=userPassword
-   DB_NAME=expresschatbot
+   DB_NAME=ChatSportiwWeb
    DB_PORT=3306
    ```
 
@@ -104,7 +104,7 @@ Hope it was helpful! <br />
 ## 🗂️ Project Structure
 
 ```
-ExpressChatBot/
+ChatSportiwWeb/
 ├── bin/                    # Binary executable files
 ├── node_modules/           # Node.js dependencies
 ├── public/                 # Static assets
