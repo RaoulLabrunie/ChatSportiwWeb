@@ -67,6 +67,31 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
    npm run start
    ```
 
+## ⚙️ Customization
+
+### Authentication Setup
+
+The authentication system is implemented in `src/auth/DB2.js`. The login process works as follows:
+
+1. The user enters their credentials on the login page
+2. The system verifies the user exists in the authentication database
+3. The system checks the user's rank/permission level in the database
+4. **Access control**: Users with a rank greater than 2 are granted access to the chat interface
+5. Users with insufficient privileges (rank ≤ 2) cannot view or access the chat functionality
+
+You can customize the authentication logic to work with your own database schema as long as you maintain this core rank-based permission verification. The minimum required structure should include user identification and a numeric rank field.
+
+### Chat Setup
+
+The chat functionality is implemented in `src/chat/LLM.js`. The chat process works as follows:
+
+1. The user submits a natural language question
+2. The system generates a SQL query from the question
+3. The system executes the query against the database
+4. The system returns the results in a human-readable format
+
+You can customize the chat logic to work with your own database schema and use case requirements. The system uses ChatGroq models (powered by llama3-70b-8192) for SQL generation, though you can configure any model of your choice. Feel fre to modify the prompt templates in `src/chat/LLM.js` to match your specific database schema and use case requirements.
+
 ## 📝 Usage
 
 ### Authentication Flow
@@ -164,33 +189,6 @@ ChatSportiwWeb/
 ├── package.json            # Project metadata
 └── README.md               # Project documentation
 ```
-
-## ⚙️ Customization
-
-You can modify the LLM integration in `src/chat/LLM.js` to adjust the prompt templates to match your specific database schema and use case requirements.
-
-### Authentication Setup
-
-The authentication system is implemented in `src/auth/DB2.js`. The login process works as follows:
-
-1. The user enters their credentials on the login page
-2. The system verifies the user exists in the authentication database
-3. The system checks the user's rank/permission level in the database
-4. **Access control**: Users with a rank greater than 2 are granted access to the chat interface
-5. Users with insufficient privileges (rank ≤ 2) cannot view or access the chat functionality
-
-You can customize the authentication logic to work with your own database schema as long as you maintain this core rank-based permission verification. The minimum required structure should include user identification and a numeric rank field.
-
-### Chat Setup
-
-The chat functionality is implemented in `src/chat/LLM.js`. The chat process works as follows:
-
-1. The user submits a natural language question
-2. The system generates a SQL query from the question
-3. The system executes the query against the database
-4. The system returns the results in a human-readable format
-
-You can customize the chat logic to work with your own database schema and use case requirements. The system uses ChatGroq models (powered by llama3-70b-8192) for SQL generation, though you can configure any model of your choice. Feel fre to modify the prompt templates in `src/chat/LLM.js` to match your specific database schema and use case requirements.
 
 ## 📋 Requirements
 
