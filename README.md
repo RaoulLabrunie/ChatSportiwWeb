@@ -23,6 +23,8 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
 - **Database Integration**: Connect to your existing database
 - **Smart Response Formatting**: Presents results in human-readable format
 - **Multilingual Support**: Responds in the same language as the question
+- **Secure Authentication**: Login system restricts access to authorized users only
+- **Permission-Based Access**: Users can only access chats based on their database permissions
 
 ## 🚀 Installation
 
@@ -44,21 +46,33 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
 
    ```
    GROQ_API_KEY=your_api_key
+
+   # Main database connection
    DB_HOST=localhost
    DB_USER=user
    DB_PASSWORD=userPassword
    DB_NAME=ChatSportiwWeb
    DB_PORT=3306
+
+   # Login database connection
+   LOGIN_DB_HOST=localhost
+   LOGIN_DB_USER=login_user
+   LOGIN_DB_PASSWORD=loginPassword
+   LOGIN_DB_NAME=logindb
+   LOGIN_DB_PORT=3306
    ```
 
 4. **Start the server**:
    ```bash
-   npm start
+   npm run start
    ```
 
 ## 📝 Usage
 
-Send questions to the server using POST requests. The system will:
+Simply log in to the website using your own auh database.
+(prevent people from using bots to attack your chat)
+
+Once you have logged in, it would automatically
 
 1. Generate a SQL query from your question
 2. Execute it against the database
@@ -141,10 +155,21 @@ ChatSportiwWeb/
 
 You can modify the LLM integration in `src/chat/LLM.js` to adjust the prompt templates to match your specific database schema and use case requirements.
 
+### ⚙️ Authentication Setup
+
+The authentication system is implemented in `src/auth/DB2.js`. You can customize the authentication logic to work with your own database schema as long as you maintain the core login validation and permission checking functionality. The system checks if:
+
+1. The user exists in the authentication database
+2. The user has the required permissions to access specific chat features
+
+You can define your own authentication database structure as needed while ensuring the authentication model in `DB2.js` is updated accordingly.
+
 ## 📋 Requirements
 
 - Node.js v14 or higher
 - MySQL database (or compatible alternative)
+  - Main database for chat functionality
+  - Authentication database for user management and permissions
 - API key for your chosen LLM provider
 
 ---
