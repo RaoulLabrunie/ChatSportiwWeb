@@ -1,15 +1,29 @@
-import { ChatGroq } from "@langchain/groq";
+import groq from "groq-sdk";
 import { db } from "./DB.js";
 import dotenv from "dotenv";
 dotenv.config();
 
 // Configuración del modelo de lenguaje
-const llm = new ChatGroq({
-  model: "llama-3.3-70b-versatile",
-  temperature: 0,
-  maxRetries: 1,
+const llm = new groq({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+async function getAnswerFromAI(prompt, promptUser) {
+  return await llm.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: prompt.trim(),
+      },
+      {
+        role: "user",
+        content: promptUser ? promptUser.trim() : "",
+      },
+    ],
+    model: "llama-3.3-70b-versatile",
+    temperature: 0,
+  });
+}
 // Función para generar consultas SQL desde el LLM
 async function getSqlFromAI(message, schema, history) {
   const prompt = `
@@ -85,20 +99,9 @@ async function getSqlFromAI(message, schema, history) {
     </history>
   `;
 
-  console.log(promptUser.trim());
+  const sqlQueryFromAI = await getAnswerFromAI(prompt, promptUser);
 
-  const aiSQLExpert = await llm.invoke([
-    {
-      role: "system",
-      content: prompt.trim(),
-    },
-    {
-      role: "user",
-      content: promptUser.trim(),
-    },
-  ]);
-
-  return aiSQLExpert.content.trim();
+  return sqlQueryFromAI.choices[0].message.content.trim();
 }
 
 // Esta funcion traduce la respuesta de la base de datos en un texto amigable para el usuario
@@ -116,21 +119,18 @@ async function getHumanFriendlyWay(message, players, history) {
         - <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
         ...
       If the user asked for a specific info add it as a part of the answer.
-      Heres the user question: 
-      <question>${message}<question>.
       Heres the result from the database: 
       <sqlquery>${players}</sqlquery>
       Remember to use the same language the question was asked.
       Heres the history of the conversation:
       <history>${history}</history>
       `;
-  const aiFriendlyWay = await llm.invoke([
-    {
-      role: "system",
-      content: prompt.trim(),
-    },
-  ]);
-  return aiFriendlyWay.content.trim();
+  const promptUser = `
+    Message: '${message}'.
+  `;
+  const aiFriendlyWay = await getAnswerFromAI(prompt, promptUser);
+
+  return aiFriendlyWay.choices[0].message.content.trim();
 }
 
 async function solveErrorMessages(message, history) {
@@ -150,13 +150,8 @@ async function solveErrorMessages(message, history) {
     <history>${history}</history>
     Remember to use the same language the question was asked.
   `;
-  const aiSolveError = await llm.invoke([
-    {
-      role: "system",
-      content: prompt.trim(),
-    },
-  ]);
-  return aiSolveError.content.trim();
+  const aiSolveError = await getAnswerFromAI(prompt);
+  return aiSolveError.choices[0].message.content.trim();
 }
 
 // Main y errorHandler son las funciones principales que usaran las funciones anteriores, donde se encuentra la ejecucion del codigo.
@@ -165,7 +160,6 @@ async function solveErrorMessages(message, history) {
 export async function main(message, schema, history) {
   // Generar la consulta SQL
   const queryFromAI = await getSqlFromAI(message, schema, history);
-  console.log(queryFromAI);
 
   let [queryResults] = "";
 
@@ -182,14 +176,14 @@ export async function main(message, schema, history) {
     queryResults = "No results found"; // Podremos gestionar esto en getHumanFriendlyWay de forma que aunque no haya resultados, se muestre un mensaje amigable
   }
 
-  const queryJsonToString = JSON.stringify(queryResults);
+  queryResults = JSON.stringify(queryResults);
 
-  console.log(queryJsonToString);
+  let extracted = extractStringFromBrackets(queryResults);
 
   //ejecutamos la segunda funcion que genera la respuesta amigable
   const humanFriendlyAnswer = await getHumanFriendlyWay(
     message,
-    queryJsonToString,
+    extracted,
     history
   );
 
@@ -267,4 +261,25 @@ function validateSqlQuery(query) {
   }
 
   return true; // La consulta es válida
+}
+
+function extractStringFromBrackets(queryResults) {
+  let brackets = 0;
+  let extracted = null;
+
+  for (let i = 0; i < queryResults.length; i++) {
+    if (queryResults[i] === "[" && brackets === 0) {
+      brackets++;
+    } else if (queryResults[i] === "[" && brackets === 1) {
+      for (let j = i + 1; j < queryResults.length; j++) {
+        if (queryResults[j] === "]") {
+          extracted = queryResults.slice(i, j + 1);
+          break;
+        }
+      }
+      break;
+    }
+  }
+
+  return extracted;
 }
