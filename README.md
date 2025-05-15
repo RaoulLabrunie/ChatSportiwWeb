@@ -181,6 +181,17 @@ The authentication system is implemented in `src/auth/DB2.js`. The login process
 
 You can customize the authentication logic to work with your own database schema as long as you maintain this core rank-based permission verification. The minimum required structure should include user identification and a numeric rank field.
 
+### Chat Setup
+
+The chat functionality is implemented in `src/chat/LLM.js`. The chat process works as follows:
+
+1. The user submits a natural language question
+2. The system generates a SQL query from the question
+3. The system executes the query against the database
+4. The system returns the results in a human-readable format
+
+You can customize the chat logic to work with your own database schema and use case requirements. The system uses ChatGroq models (powered by llama3-70b-8192) for SQL generation, though you can configure any model of your choice. Feel fre to modify the prompt templates in `src/chat/LLM.js` to match your specific database schema and use case requirements.
+
 ## 📋 Requirements
 
 - Node.js v14 or higher
