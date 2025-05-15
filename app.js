@@ -7,7 +7,6 @@ import logger from "morgan";
 import session from "express-session";
 
 import indexRouter from "./routes/index.js";
-import usersRouter from "./routes/users.js";
 import sendRouter from "./routes/send.js";
 import authRouter from "./routes/auth.js";
 import chatRouter from "./routes/chat.js";
@@ -36,7 +35,6 @@ app.use(
 );
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
 app.use("/send", sendRouter);
 app.use("/auth", authRouter);
 app.use("/chat", chatRouter);
@@ -57,5 +55,7 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error");
 });
+
+app.use(session({ secret: "chatbot" }));
 
 export default app;

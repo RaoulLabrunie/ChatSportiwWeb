@@ -5,20 +5,19 @@ import { getLogin } from "../src/auth/DB2.js"; // adjust path as needed
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
-  const { email, password, cargo } = req.body;
+  const { email, password } = req.body;
 
   try {
     const valid = await getLogin(email, password);
 
-    console.log(valid);
-
     if ([1, 2, 3].includes(valid)) {
+      session.isLoggedIn = true;
+      session.importancia = valid;
+
       return res.status(200).json({
         message: "Login correcto",
-        redirect: "/noChat",
+        redirect: "/chat",
       });
-      req.session.importancia = valid;
-      req.session.isLoggedIn = true;
     } else {
       // Send an unauthorized response
       return res.status(401).json({
