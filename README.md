@@ -5,10 +5,6 @@
 
 > A natural language interface for database queries that translates user questions into SQL and presents results in a human-friendly format.
 
-<div align="center">
-  <img src="/api/placeholder/800/400" alt="ExpressChatBot Demo" />
-</div>
-
 ## ✨ Overview
 
 **ExpressChatBot** transforms the way you interact with databases through natural language. The system:
