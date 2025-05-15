@@ -1,7 +1,7 @@
 # 🤖 ChatSportiwWeb
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/GPL-3.0-green)
 
 > A natural language interface for database queries that translates user questions into SQL and presents results in a human-friendly format.
 
