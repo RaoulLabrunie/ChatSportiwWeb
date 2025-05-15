@@ -69,14 +69,28 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
 
 ## 📝 Usage
 
-Simply log in to the website using your own auh database.
-(prevent people from using bots to attack your chat)
+### Authentication Flow
 
-Once you have logged in, it would automatically
+1. Navigate to the login page
+2. Enter your username and password
+3. The system authenticates against the database in `src/auth/DB2.js`
+4. If authenticated, the system checks your user rank
+5. Only users with rank > 2 can access the chat interface
+6. Users with insufficient rank (≤ 2) will be denied access
 
-1. Generate a SQL query from your question
-2. Execute it against the database
-3. Format the results in a human-readable way
+### Chat Interaction
+
+Once authenticated with sufficient privileges:
+
+1. Use the web interface to submit natural language questions
+2. The system generates a SQL query from your question
+3. Executes it against the database
+4. Returns the results in a human-readable format
+
+To access the chat functionality, users must:
+
+- Have a valid account in the authentication database
+- Have a user rank greater than 2
 
 ### Example
 
@@ -155,14 +169,17 @@ ChatSportiwWeb/
 
 You can modify the LLM integration in `src/chat/LLM.js` to adjust the prompt templates to match your specific database schema and use case requirements.
 
-### ⚙️ Authentication Setup
+### Authentication Setup
 
-The authentication system is implemented in `src/auth/DB2.js`. You can customize the authentication logic to work with your own database schema as long as you maintain the core login validation and permission checking functionality. The system checks if:
+The authentication system is implemented in `src/auth/DB2.js`. The login process works as follows:
 
-1. The user exists in the authentication database
-2. The user has the required permissions to access specific chat features
+1. The user enters their credentials on the login page
+2. The system verifies the user exists in the authentication database
+3. The system checks the user's rank/permission level in the database
+4. **Access control**: Users with a rank greater than 2 are granted access to the chat interface
+5. Users with insufficient privileges (rank ≤ 2) cannot view or access the chat functionality
 
-You can define your own authentication database structure as needed while ensuring the authentication model in `DB2.js` is updated accordingly.
+You can customize the authentication logic to work with your own database schema as long as you maintain this core rank-based permission verification. The minimum required structure should include user identification and a numeric rank field.
 
 ## 📋 Requirements
 
