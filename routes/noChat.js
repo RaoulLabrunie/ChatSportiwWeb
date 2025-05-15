@@ -3,7 +3,6 @@ const router = express.Router();
 
 // Main chat route
 router.get("/", (req, res) => {
-  console.log("Rendering chat view");
   try {
     res.render("paginaSinChat");
   } catch (error) {
