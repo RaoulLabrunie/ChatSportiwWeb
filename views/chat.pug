@@ -23,11 +23,17 @@ block content
               span.d-none.d-sm-inline Send
               i.fas.fa-paper-plane.d-inline.d-sm-none
 
-    //- Template para mensajes, se reutiliza para cada mensaje.
-    template#msgTemplate
-      li.message.mb-3
-        .d-flex.flex-column.flex-sm-row
-          span.role.text-muted.me-0.me-sm-2.mb-1.mb-sm-0
+    //- Template para mensajes del usuario
+    template#userMsgTemplate
+      li.message.mb-3.text-end
+        .d-inline-block.bg-primary.text-white.p-2.rounded-3.mw-75
+          p.content.m-0
+
+    //- Template para mensajes del sistema/bot
+    template#systemMsgTemplate
+      li.message.mb-3.text-start
+        .d-inline-block.bg-light.p-2.rounded-3.mw-75
+          span.role.d-block.text-muted.small.mb-1 System
           p.content.m-0
 
   script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js")
