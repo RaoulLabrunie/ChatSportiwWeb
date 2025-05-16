@@ -5,28 +5,30 @@ block content
   body
     .container-fluid.d-flex.flex-column.vh-100.bg-light
       //- Cabecera
-      .row.bg-primary.text-white.p-3
+      .row.bg-primary.text-white.p-2.p-sm-3
         .col
-          h1.text-center.mb-0 Chatbot
+          h1.text-center.mb-0.fs-2.fs-md-1 Chatbot
       
       //- Área de mensajes (contenedor expandible)
       .row.flex-grow-1.overflow-auto.bg-white
         .col
-          ul#messages.list-unstyled.p-3
+          ul#messages.list-unstyled.p-2.p-sm-3
       
       //- Formulario fijo en la parte inferior
-      .row.bg-light.py-3
+      .row.bg-light.py-2.py-sm-3
         .col
           form.d-flex.align-items-center
             input.form-control.me-2(type="text", name="msg", placeholder="Type your message here...", required)
-            button.btn.btn-primary(type="submit") Send
+            button.btn.btn-primary.d-flex.align-items-center(type="submit")
+              span.d-none.d-sm-inline Send
+              i.fas.fa-paper-plane.d-inline.d-sm-none
 
     //- Template para mensajes, se reutiliza para cada mensaje.
     template#msgTemplate
       li.message.mb-3
-        .d-flex
-          span.role.text-muted.me-2
+        .d-flex.flex-column.flex-sm-row
+          span.role.text-muted.me-0.me-sm-2.mb-1.mb-sm-0
           p.content.m-0
 
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js")
   script(rel="javascript", src="/javascripts/chat.js")
-    

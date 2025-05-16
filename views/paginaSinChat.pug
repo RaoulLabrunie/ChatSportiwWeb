@@ -4,48 +4,52 @@ block content
   body
     .container-fluid.d-flex.flex-column.vh-100.bg-light
       //- Header
-      .row.bg-primary.text-white.p-3
-        .col
-          h1.text-center.mb-0 My Tech Blog
-        .col-auto.text-center
-          a.btn.btn-primary#loginBtn(href="/login") Login
-          a.btn.btn-primary#chatBtn(href="/chat") Chat
+      .row.bg-primary.text-white.p-2.p-md-3
+        .col-7.col-sm-8
+          h1.text-center.fs-3.fs-md-2.fs-lg-1.mb-0 My Tech Blog
+        .col-5.col-sm-4.d-flex.justify-content-end.align-items-center
+          a.btn.btn-outline-light.btn-sm.me-2(href="/login") 
+            i.fas.fa-sign-in-alt.d-inline.d-md-none
+            span.d-none.d-md-inline Login
+          a.btn.btn-outline-light.btn-sm(href="/chat") 
+            i.fas.fa-comments.d-inline.d-md-none
+            span.d-none.d-md-inline Chat
 
       //- Main Content Area
       .row.flex-grow-1.overflow-auto.bg-white
-        .col-md-8.offset-md-2.p-4
+        .col-12.col-lg-10.offset-lg-1.p-3.p-md-4
           //- Featured Post
           .card.mb-4
             .card-header.bg-secondary.text-white
-              h2 Featured Post
+              h2.fs-4.fs-md-3 Featured Post
             .card-body
-              h3.card-title Exploring the Future of AI
-              p.card-text.text-muted By John Doe | Published on May 12, 2025
+              h3.card-title.fs-5.fs-md-4 Exploring the Future of AI
+              p.card-text.text-muted.small By John Doe | Published on May 12, 2025
               p.card-text 
                 | Artificial Intelligence continues to revolutionize industries, from healthcare to technology. 
                 | In this post, we dive deep into the latest advancements and their potential impact on our daily lives.
-              a.btn.btn-primary(href="#") Read More
+              a.btn.btn-primary.btn-sm(href="#") Read More
 
           //- Recent Posts Section
           .row
-            .col-md-6.mb-4
+            .col-12.col-md-6.mb-4
               .card.h-100
                 .card-header Web Development
                 .card-body
-                  h4.card-title JavaScript Frameworks in 2025
-                  p.card-text 
+                  h4.card-title.fs-5 JavaScript Frameworks in 2025
+                  p.card-text.small
                     | A comprehensive look at the most popular JavaScript frameworks 
                     | and how they're shaping modern web development.
                   .d-flex.justify-content-between.align-items-center
                     small.text-muted By Sarah Smith
                     a.btn.btn-sm.btn-outline-primary(href="#") Read
 
-            .col-md-6.mb-4
+            .col-12.col-md-6.mb-4
               .card.h-100
                 .card-header Machine Learning
                 .card-body
-                  h4.card-title Neural Networks Explained
-                  p.card-text 
+                  h4.card-title.fs-5 Neural Networks Explained
+                  p.card-text.small
                     | Breaking down the complex world of neural networks 
                     | and their applications in modern technology.
                   .d-flex.justify-content-between.align-items-center
@@ -53,9 +57,9 @@ block content
                     a.btn.btn-sm.btn-outline-primary(href="#") Read
 
       //- Footer
-      .row.bg-dark.text-white.p-3
+      .row.bg-dark.text-white.p-2.p-md-3
         .col.text-center
-          p.mb-0 © 2025 Tech Insights Blog | All Rights Reserved
+          p.mb-0.small © 2025 Tech Insights Blog | All Rights Reserved
           .social-links.mt-2
             a.text-white.me-2(href="#") 
               i.fab.fa-twitter
@@ -73,16 +77,19 @@ block content
       font-weight: bold;
     }
     .social-links a {
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       transition: color 0.3s ease;
     }
     .social-links a:hover {
       color: #61dafb !important;
     }
+    @media (max-width: 576px) {
+      .card-body {
+        padding: 0.75rem;
+      }
+    }
 
-  //- Optional: Font Awesome for social icons
+  //- Font Awesome para iconos
   link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css")
 
-  //- The script tag is moved outside of the body for better execution
   script(rel="javascript", src="/javascripts/paginaSinChat.js")
-    
