@@ -73,6 +73,7 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
 
 The authentication system is implemented in `src/auth/DB2.js`. The login process works as follows:
 
+
 1. The user enters their credentials on the login page
 2. The system verifies the user exists in the authentication database
 3. The system checks the user's rank/permission level in the database
