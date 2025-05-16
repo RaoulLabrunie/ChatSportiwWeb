@@ -1,14 +1,10 @@
 import express from "express";
 import { main, errorHandler } from "../src/chat/LLM.js";
-import { getSchema } from "../src/chat/DB.js";
+import { schema } from "../src/chat/DB.js";
 import { history, addToHistory } from "../src/chat/history.js";
 import { hasChatAccessAPI } from "../middlewares/auth.js";
 
 const router = express.Router();
-
-const gettingSchema = await getSchema(); //Se encuentra en ../src/chat/javascript/DB.js
-//al pasar el schema en JSON al LLM da error y el valor se pasa como nulo por ello pasamos el tipo a string
-const schema = JSON.stringify(gettingSchema);
 
 // Aplicar middleware de verificación para API
 router.use(hasChatAccessAPI);

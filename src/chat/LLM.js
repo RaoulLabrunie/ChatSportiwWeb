@@ -1,8 +1,8 @@
 import groq from "groq-sdk";
 import { db } from "./DB.js";
 import dotenv from "dotenv";
-dotenv.config();
 
+dotenv.config();
 // Configuración del modelo de lenguaje
 const llm = new groq({
   apiKey: process.env.OPENAI_API_KEY,
@@ -73,6 +73,76 @@ async function getSqlFromAI(message, schema, history) {
     JOIN profiles p ON u.id = p.user_id
     WHERE u.gender = 'Female'
     LIMIT 10;
+
+    Question: I want football players with few yellow cards.
+    SQL Query: 
+    SELECT DISTINCT 
+        u.first_name, 
+        u.last_name, 
+        ef.yellow_statistic,
+        CONCAT(
+            'https://sportiw.com/en/athletes/', 
+            REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), 
+            '/', 
+            p.id
+        ) AS link
+    FROM user u
+    JOIN profiles p ON u.id = p.user_id
+    JOIN experiences_football ef ON p.id = ef.profile_id
+    JOIN sports s ON p.sport_id = s.id AND s.name = 'Football'
+    WHERE ef.yellow_statistic < 5 
+    ORDER BY RAND()
+    LIMIT 10;
+
+    Question: Give me all the info from x player;
+    SQL Query:
+    SELECT u.*, 
+          p.*,
+          c.name AS country_name, 
+          c.nationality,
+          s.name AS sport_name,
+          sp.name AS position_name,
+          sl.category AS sportive_level,
+          cl.name AS club_name,
+          CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS profile_link
+    FROM user u
+    JOIN profiles p ON u.id = p.user_id
+    LEFT JOIN countries c ON u.country_id = c.id
+    LEFT JOIN sports s ON p.sport_id = s.id
+    LEFT JOIN sport_positions sp ON p.main_position_id = sp.id
+    LEFT JOIN sportive_levels sl ON p.sportive_level_id = sl.id
+    LEFT JOIN clubs cl ON p.club_situation = cl.id
+    WHERE u.first_name = ? AND u.last_name = ?
+    LIMIT 1;
+
+    Question: How well did x player do in the last season?
+    SQL Query:
+    SELECT
+        ef.season_id,
+        s.name AS season_name,
+        ef.league_id,
+        ef.club_id,
+        ef.played_statistic,
+        ef.time_statistic,
+        ef.goal_statistic,
+        ef.assist_statistic,
+        ef.yellow_statistic,
+        ef.red_statistic,
+        CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
+    FROM
+        user u
+    JOIN
+        profiles p ON u.id = p.user_id
+    JOIN
+        experiences_football ef ON p.id = ef.profile_id
+    LEFT JOIN
+        seasons s ON ef.season_id = s.id
+    WHERE
+        u.first_name = ? AND u.last_name = ?
+    ORDER BY
+        ef.id DESC
+    LIMIT 5;
+
 
     Your turn.
 
@@ -161,33 +231,38 @@ export async function main(message, schema, history) {
   // Generar la consulta SQL
   const queryFromAI = await getSqlFromAI(message, schema, history);
 
-  let [queryResults] = "";
+  console.log(queryFromAI);
 
-  if (!validateSqlQuery(queryFromAI)) {
-    queryResults =
-      "La consulta no es valida, coniene comandos peligrosos o múltiples instrucciones. Informa al usuario de forma amable.";
-  } else {
-    queryResults = await db.query(queryFromAI);
+  // Extraer los valores y obtener la consulta parametrizada
+  const { query: parameterizedQuery, values } = extractSqlValues(queryFromAI);
+
+  let queryResults;
+
+  try {
+    // Ejecutar la consulta en la base de datos de forma segura
+    // usando la consulta parametrizada y los valores extraídos
+    queryResults = await db.query(parameterizedQuery, values);
+
+    if (!queryResults || queryResults.length === 0) {
+      queryResults = "No results found"; // Mensaje para consultas sin resultados
+    } else {
+      queryResults = JSON.stringify(queryResults);
+    }
+
+    let extracted = extractStringFromBrackets(queryResults);
+
+    // Ejecutamos la segunda función que genera la respuesta amigable
+    const humanFriendlyAnswer = await getHumanFriendlyWay(
+      message,
+      extracted,
+      history
+    );
+
+    return humanFriendlyAnswer;
+  } catch (error) {
+    console.error("Error executing database query:", error);
+    return `Lo siento, ocurrió un error al consultar la base de datos: ${error.message}`;
   }
-
-  // Ejecutar la consulta en la base de datos
-
-  if (queryResults.length === 0) {
-    queryResults = "No results found"; // Podremos gestionar esto en getHumanFriendlyWay de forma que aunque no haya resultados, se muestre un mensaje amigable
-  }
-
-  queryResults = JSON.stringify(queryResults);
-
-  let extracted = extractStringFromBrackets(queryResults);
-
-  //ejecutamos la segunda funcion que genera la respuesta amigable
-  const humanFriendlyAnswer = await getHumanFriendlyWay(
-    message,
-    extracted,
-    history
-  );
-
-  return humanFriendlyAnswer;
 }
 
 export async function errorHandler(message, error) {
@@ -197,70 +272,47 @@ export async function errorHandler(message, error) {
   return errorAnswer;
 }
 
-function startsWithSelect(query) {
-  return query.trim().toUpperCase().startsWith("SELECT");
-}
-
-function containsForbiddenCommands(query) {
-  const forbiddenCommands = [
-    "DROP",
-    "DELETE",
-    "UPDATE",
-    "INSERT",
-    "TRUNCATE",
-    "ALTER",
-    "CREATE",
-    "REPLACE INTO",
-    "MERGE",
-    "GRANT",
-    "EXECUTE",
-    "CALL",
-  ];
-
-  for (let command of forbiddenCommands) {
-    if (query.toUpperCase().includes(command)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function containsMultipleQueries(query) {
-  const statements = query
-    .split(";")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-
-  return statements.length > 1; // Solo es inválido si hay más de una instrucción
-}
-
-function containsMaliciousComments(query) {
-  const forbiddenComments = ["--", "/*", "*/"];
-  return forbiddenComments.some((comment) => query.includes(comment));
-}
-
-function validateSqlQuery(query) {
-  if (!startsWithSelect(query)) {
-    console.log("La consulta debe comenzar con SELECT");
-    return false;
+function extractSqlValues(query) {
+  // Verifica si la entrada es válida
+  if (!query || typeof query !== "string") {
+    return { error: "La consulta debe ser una cadena de texto válida" };
   }
 
-  if (containsForbiddenCommands(query)) {
-    console.log("La consulta contiene comandos peligrosos");
-    return false;
+  // Inicialización de variables
+  const values = [];
+  let queryWithPlaceholders = "";
+  let currentPos = 0;
+
+  // Regex para encontrar cadenas entre comillas simples
+  // Nota: Esta regex maneja casos donde hay comillas escapadas con \'
+  const stringRegex = /'(?:[^'\\]|\\.)*'/g;
+  let match;
+
+  // Procesar cada coincidencia de string en comillas
+  while ((match = stringRegex.exec(query)) !== null) {
+    // Añadir texto anterior al valor encontrado
+    queryWithPlaceholders += query.substring(currentPos, match.index);
+
+    // Añadir el marcador de posición
+    queryWithPlaceholders += "?";
+
+    // Guardar el valor sin las comillas
+    const value = match[0]
+      .substring(1, match[0].length - 1)
+      .replace(/\\'/g, "'"); // Manejar comillas escapadas
+    values.push(value);
+
+    // Actualizar posición actual
+    currentPos = match.index + match[0].length;
   }
 
-  if (containsMultipleQueries(query)) {
-    console.log("La consulta contiene múltiples instrucciones");
-    return false;
-  }
+  // Añadir el resto de la consulta
+  queryWithPlaceholders += query.substring(currentPos);
 
-  if (containsMaliciousComments(query)) {
-    console.log("La consulta contiene comentarios peligrosos");
-    return false;
-  }
-
-  return true; // La consulta es válida
+  return {
+    query: queryWithPlaceholders,
+    values: values,
+  };
 }
 
 function extractStringFromBrackets(queryResults) {

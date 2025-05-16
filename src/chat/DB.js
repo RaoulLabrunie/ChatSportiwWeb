@@ -38,4 +38,9 @@ async function getSchema() {
   return schema;
 }
 
-export { db, getSchema };
+const gettingSchema = await getSchema(); //Se encuentra en ../src/chat/javascript/DB.js
+//al pasar el schema en JSON al LLM da error y el valor se pasa como nulo por ello pasamos el tipo a string
+const schema = JSON.stringify(gettingSchema);
+console.log(schema);
+
+export { db, schema };
