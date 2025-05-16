@@ -1,18 +1,19 @@
 import express from "express";
-import session from "express-session";
-var router = express.Router();
+import { isAuthenticated } from "../middlewares/auth.js";
+
+const router = express.Router();
 
 /* GET home page. */
-router.get("/", function (req, res, next) {
-  if (session.isLoggedIn) {
-    res.redirect("/chat");
-  }else {
+router.get("/login", function (req, res, next) {
+  if (req.session.isLoggedIn) {
+    res.redirect("/noChat");
+  } else {
     res.render("index");
   }
 });
 
-router.get("/login", function (req, res, next) {
-  res.render("index");
+router.get("/", function (req, res, next) {
+  res.render("paginaSinChat");
 });
 
 export default router;

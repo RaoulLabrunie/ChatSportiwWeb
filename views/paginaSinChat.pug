@@ -7,6 +7,9 @@ block content
       .row.bg-primary.text-white.p-3
         .col
           h1.text-center.mb-0 My Tech Blog
+        .col-auto.text-center
+          a.btn.btn-primary#loginBtn(href="/login") Login
+          a.btn.btn-primary#chatBtn(href="/chat") Chat
 
       //- Main Content Area
       .row.flex-grow-1.overflow-auto.bg-white
@@ -79,3 +82,7 @@ block content
 
   //- Optional: Font Awesome for social icons
   link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css")
+
+  //- The script tag is moved outside of the body for better execution
+  script(rel="javascript", src="/javascripts/paginaSinChat.js")
+    
