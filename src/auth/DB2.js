@@ -9,7 +9,7 @@ const db2 = mysql
     user: process.env.LOGIN_DB_USER,
     password: process.env.LOGIN_DB_PASSWORD,
     database: process.env.LOGIN_DB_NAME,
-    port: process.env.DB_PORT,
+    port: process.env.LOGIN_DB_PORT,
     waitForConnections: true,
     connectionLimit: 10,
   })

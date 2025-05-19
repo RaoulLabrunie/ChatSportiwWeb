@@ -3,8 +3,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const form = document.querySelector("form");
   const input = document.querySelector("input");
   const messagesContainer = document.querySelector("#messages");
+  const messagesWrapper = document.querySelector(
+    ".row.flex-grow-1.overflow-auto"
+  );
   const userMsgTemplate = document.querySelector("#userMsgTemplate");
   const systemMsgTemplate = document.querySelector("#systemMsgTemplate");
+  const loadingMsgTemplate = document.querySelector("#loadingMsgTemplate");
+
+  let loadingMessageElement = null;
 
   // Evento de envío de mensaje
   form.addEventListener("submit", async (event) => {
@@ -14,6 +20,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (messageText != "") {
       addMessage(messageText, "user");
       input.value = "";
+
+      // Mostrar indicador de carga
+      showLoadingIndicator();
 
       // se hace un fetch a la ruta /send para enviar el mensaje (send.js)
       try {
@@ -25,13 +34,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const data = await response.text();
 
+        // Eliminar el indicador de carga
+        removeLoadingIndicator();
+
         // Mostrar la respuesta del bot como HTML (enlaces clicables)
         addMessage(data, "system", true);
       } catch (error) {
+        // Eliminar el indicador de carga en caso de error
+        removeLoadingIndicator();
+
         console.error("Hubo un problema con la solicitud:", error);
+        addMessage(
+          "Lo siento, ha ocurrido un error al procesar tu mensaje.",
+          "system"
+        );
       }
     }
   });
+
+  // Función para mostrar el indicador de carga
+  function showLoadingIndicator() {
+    const clonedTemplate = loadingMsgTemplate.content.cloneNode(true);
+    loadingMessageElement = clonedTemplate.querySelector("li");
+    messagesContainer.appendChild(clonedTemplate);
+
+    // Desplazarse hasta el indicador de carga
+    scrollToBottom();
+  }
+
+  // Función para eliminar el indicador de carga
+  function removeLoadingIndicator() {
+    if (loadingMessageElement && loadingMessageElement.parentNode) {
+      loadingMessageElement.parentNode.removeChild(loadingMessageElement);
+      loadingMessageElement = null;
+    }
+  }
 
   // Función para añadir mensaje utilizando las nuevas plantillas
   function addMessage(text, sender, isHtml = false) {
@@ -51,6 +88,14 @@ document.addEventListener("DOMContentLoaded", function () {
     messagesContainer.appendChild(clonedTemplate);
 
     // Desplazarse hasta el último mensaje
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    scrollToBottom();
+  }
+
+  // Función para desplazarse al final de los mensajes
+  function scrollToBottom() {
+    setTimeout(() => {
+      // El scroll debe aplicarse al div con overflow-auto
+      messagesWrapper.scrollTop = messagesWrapper.scrollHeight;
+    }, 10);
   }
 });

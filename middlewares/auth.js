@@ -21,10 +21,9 @@ export function hasChatAccess(req, res, next) {
     }
   } else {
     // Usuario no autenticado
-    res.redirect("/login");
+    res.redirect("/login"); // Redireccionar al login
   }
 }
-
 // Middleware para verificar acceso al chat via API
 export function hasChatAccessAPI(req, res, next) {
   if (req.session && req.session.isLoggedIn) {

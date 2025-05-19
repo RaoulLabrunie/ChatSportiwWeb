@@ -40,6 +40,15 @@ block content
         .d-inline-block.bg-light.p-2.rounded-3.mw-75
           span.role.d-block.text-muted.small.mb-1 System
           p.content.m-0
+          
+    //- Template para el indicador de carga
+    template#loadingMsgTemplate
+      li.message.mb-3.text-start.loading-message
+        .d-inline-block.bg-light.p-2.rounded-3
+          .d-flex.align-items-center
+            .spinner-border.spinner-border-sm.text-primary.me-2(role="status")
+              span.visually-hidden Cargando...
+            span Escribiendo...
 
   //- Scripts necesarios
   script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js")

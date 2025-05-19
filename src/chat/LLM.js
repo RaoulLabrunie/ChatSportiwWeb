@@ -143,13 +143,39 @@ async function getSqlFromAI(message, schema, history) {
         ef.id DESC
     LIMIT 5;
 
+    Question: I was searching someone that have played recently.
+    SQL Query:
+    SELECT
+        ef.season_id,
+        s.name AS season_name,
+        ef.league_id,
+        ef.club_id,
+        ef.played_statistic,
+        ef.time_statistic,
+        ef.goal_statistic,
+        ef.assist_statistic,
+        ef.yellow_statistic,
+        ef.red_statistic,
+        CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
+    FROM
+        user u
+    JOIN
+        profiles p ON u.id = p.user_id
+    JOIN
+        experiences_football ef ON p.id = ef.profile_id
+    LEFT JOIN
+        seasons s ON ef.season_id = s.id
+    ORDER BY
+        s.name DESC
+    LIMIT 5;
+
 
     Your turn.
 
     Imagine the user references something from another question, "i want all the info from the 2nd one". You must search the second player and with its name, search whatever the user asked.
     Take into account that there are 3 different tables for experiences.
     Filter the players randomly.
-    Always limit your response to 10 if the user does not specify how many players they want.
+    Always limit your response to 1-10 players if the user does not specify how many players they want.
     Do not repeat information.
     If the user asks for a specific player, you must return the principal information of the player with the link to their profile.
     SQL Query:
@@ -181,6 +207,7 @@ async function getHumanFriendlyWay(message, players, history) {
       If the sql result is not too long you can ask for more details in a super formal way.
       You will answer the user question in a friendly formal way.
       You will pay special attention to the history of the conversation.
+      You will not say the information you got is not enough, never, but if you consider so you will ask if the user wants more info.
       Remove duplicated information. 
       You will understand the user question, for example, if the user says thanks and you receive a list of players, you will not show the players and just say thanks.
       You must follow the next format: "- <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>".
@@ -207,6 +234,7 @@ async function solveErrorMessages(message, history) {
   const prompt = `
     There's been an error in the sql query but you wont say that, you will tell the customer that you cant provide the answer to his question in that moment.
     You will answer the user question in a friendly formal way.
+    NEVER SAY THE ERROR MESSAGE, YOU WILL NEVER SPECIGY THE ERROR MESSAGE.
     You need to inform the customer that despite the error, you can still answer all his questions!
     Make sense with the user question to be more empathic.
     If the question is not about players or sports tell him that he might not be using the adecuate tool.
