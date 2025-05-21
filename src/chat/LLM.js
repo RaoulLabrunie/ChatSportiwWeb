@@ -286,7 +286,7 @@ export async function main(message, schema, history) {
       history
     );
 
-    return humanFriendlyAnswer;
+    return { humanFriendlyAnswer, queryFromAI };
   } catch (error) {
     console.error("Error executing database query:", error);
     return `Lo siento, ocurrió un error al consultar la base de datos: ${error.message}`;

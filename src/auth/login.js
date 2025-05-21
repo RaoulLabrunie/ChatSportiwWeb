@@ -22,8 +22,10 @@ async function getLogin(email, password) {
   );
 
   const importancia = rows[0].id_importancia;
+  const id_usuario = rows[0].id_usuario;
+
   if (rows.length > 0) {
-    return importancia;
+    return { importancia, id_usuario };
   } else {
     return false;
   }

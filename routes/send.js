@@ -3,6 +3,7 @@ import { main, errorHandler } from "../src/chat/LLM.js";
 import { schema } from "../src/chat/DB.js";
 import { history, addToHistory } from "../src/chat/history.js";
 import { hasChatAccessAPI } from "../middlewares/auth.js";
+import { sendMensajeMetadata } from "../src/auth/metadata.js";
 
 const router = express.Router();
 
@@ -14,10 +15,18 @@ router.post("/", async (req, res) => {
   const { msg: message } = req.body; //obtenemos el mensaje enviado por el usuario
 
   try {
-    const finalAnswerFromAI = await main(message, schema, history); //Esta funcion se encuentra en ../src/chat/javascript/LLM.js
-    addToHistory(message, finalAnswerFromAI); //agregamos el mensaje al historial, esto se encuentra en ../src/chat/javascript/history.js
+    const finalAnswerFromAI = await main(message, schema, history); //Esta funcion se encuentra en ../src/chat/javascript/LLM.js\
 
-    res.send(`<ul>${finalAnswerFromAI}</ul>`); //enviamos la respuesta formateada en HTML
+    addToHistory(message, finalAnswerFromAI.humanFriendlyAnswer); //agregamos el mensaje al historial, esto se encuentra en ../src/chat/javascript/history.js
+
+    sendMensajeMetadata(
+      req,
+      message,
+      finalAnswerFromAI.queryFromAI,
+      finalAnswerFromAI.humanFriendlyAnswer
+    ); //Esta funcion se encuentra en ../src/auth/metadata.js
+
+    res.send(`<ul>${finalAnswerFromAI.humanFriendlyAnswer}</ul>`);
   } catch (error) {
     console.error("Error procesando la consulta:", error);
 
