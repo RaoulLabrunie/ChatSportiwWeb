@@ -104,7 +104,7 @@ The login will automatically send the users id, importance, date, device and bro
 
 Each time the user sends a message, the system will send the message and the sql query to the metadata database. This information is stored in the mesagemetadata table.
 
-### DB SQL examples
+### DB structure examples
 
 ```sql
 CREATE TABLE users(
