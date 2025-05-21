@@ -60,6 +60,14 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
    LOGIN_DB_PASSWORD=loginPassword
    LOGIN_DB_NAME=logindb
    LOGIN_DB_PORT=3306
+
+
+   #Metadata database connection
+   METADATA_DB_HOST=localhost
+   METADATA_DB_USER=metadata_user
+   METADATA_DB_PASSWORD=metadataPassword
+   METADATA_DB_NAME=metadatadb
+   METADATA_DB_PORT=3306
    ```
 
 4. **Start the server**:
@@ -72,7 +80,6 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
 ### Authentication Setup
 
 The authentication system is implemented in `src/auth/DB2.js`. The login process works as follows:
-
 
 1. The user enters their credentials on the login page
 2. The system verifies the user exists in the authentication database
@@ -90,6 +97,46 @@ The chat functionality is implemented in `src/chat/LLM.js`. The chat process wor
 2. The system generates a SQL query from the question
 3. The system executes the query against the database
 4. The system returns the results in a human-readable format
+
+### Metadata
+
+The login will automatically send the users id, importance, date, device and browser. This information is stored in the metadata database. In chatmetadata.
+
+Each time the user sends a message, the system will send the message and the sql query to the metadata database. This information is stored in the mesagemetadata table.
+
+### DB SQL examples
+
+```sql
+CREATE TABLE users(
+    user_id,
+    name,
+    email,
+    password
+);
+
+CREATE TABLE importance(
+    importance_id,
+    importance
+);
+
+CREATE TABLE chatmetadata(
+    chat_id,
+    user_id,
+    importance_id,
+    inDate,
+    device,
+    browser
+);
+
+CREATE TABLE mensajemetadata(
+    message_id,
+    user_id,
+    message,
+    extractedsql
+);
+```
+
+(just a little example of the database structure)
 
 You can customize the chat logic to work with your own database schema and use case requirements. The system uses ChatGroq models (powered by llama3-70b-8192) for SQL generation, though you can configure any model of your choice. Feel fre to modify the prompt templates in `src/chat/LLM.js` to match your specific database schema and use case requirements.
 
@@ -123,7 +170,9 @@ To access the chat functionality, users must:
 **User Query:**
 
 ```
+
 Give me 10 players who have played in NCAA with height greater than 2 meters and a free throw statistic greater than 50?
+
 ```
 
 **Database Result:**
