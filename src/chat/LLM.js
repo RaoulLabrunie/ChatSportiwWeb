@@ -169,6 +169,36 @@ async function getSqlFromAI(message, schema, history) {
         s.name DESC
     LIMIT 5;
 
+    QUESTION: Tell me more bout x.
+    SQL Query:
+    SELECT
+        u.first_name,
+        u.last_name,
+        u.height,
+        u.birth_date,
+        ef.season_id,
+        s.name AS season_name,  -- Añadido el nombre de la season
+        ef.played_statistic,
+        ef.time_statistic,
+        ef.goal_statistic,
+        ef.assist_statistic,
+        ef.yellow_statistic,
+        ef.red_statistic,
+        CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
+    FROM
+        user u
+    JOIN
+        profiles p ON u.id = p.user_id
+    JOIN
+        experiences_football ef ON p.id = ef.profile_id
+    LEFT JOIN
+        seasons s ON ef.season_id = s.id  -- Join con seasons para obtener el nombre
+    WHERE
+        u.first_name = 'x' AND u.last_name = 'x'
+    ORDER BY
+        ef.season_id DESC
+    LIMIT 10;
+
 
     Your turn.
 
