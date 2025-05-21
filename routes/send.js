@@ -12,28 +12,37 @@ router.use(hasChatAccessAPI);
 
 // Ruta principal
 router.post("/", async (req, res) => {
-  const { msg: message } = req.body; //obtenemos el mensaje enviado por el usuario
+  const { msg: message } = req.body;
 
   try {
-    const finalAnswerFromAI = await main(message, schema, history); //Esta funcion se encuentra en ../src/chat/javascript/LLM.js\
+    const finalAnswerFromAI = await main(message, schema, history);
 
-    addToHistory(message, finalAnswerFromAI.humanFriendlyAnswer); //agregamos el mensaje al historial, esto se encuentra en ../src/chat/javascript/history.js
+    addToHistory(message, finalAnswerFromAI.humanFriendlyAnswer);
 
     sendMensajeMetadata(
       req,
       message,
       finalAnswerFromAI.queryFromAI,
       finalAnswerFromAI.humanFriendlyAnswer
-    ); //Esta funcion se encuentra en ../src/auth/metadata.js
+    );
 
-    res.send(`<ul>${finalAnswerFromAI.humanFriendlyAnswer}</ul>`);
+    // ✅ Respuesta en JSON
+    res.json({
+      success: true,
+      response: finalAnswerFromAI.humanFriendlyAnswer,
+      rawQuery: finalAnswerFromAI.queryFromAI,
+    });
   } catch (error) {
     console.error("Error procesando la consulta:", error);
 
-    const errorAnswer = await errorHandler(message, history); //Esta funcion se encuentra en ../src/chat/javascript/LLM.js
-    addToHistory(message, errorAnswer); //agregamos el mensaje al historial
+    const errorAnswer = await errorHandler(message, history);
+    addToHistory(message, errorAnswer);
 
-    res.send(`<ul>${errorAnswer}</ul>`);
+    // ✅ Error en JSON
+    res.status(500).json({
+      success: false,
+      response: errorAnswer,
+    });
   }
 });
 
