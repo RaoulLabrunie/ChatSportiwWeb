@@ -1,7 +1,7 @@
 <?php
 $url = 'http://localhost:3000/send'; // Cambia por la URL de tu API
 
-$data = ['msg' => 'que tal le fue en sus ultimas 3 temporadas'];
+$data = ['msg' => 'que tal le fue en las ultimas 3 temporadas'];
 
 $options = [
   'http' => [
@@ -22,6 +22,7 @@ if ($result === FALSE) {
 $response = json_decode($result, true);
 
 if (isset($response['success']) && $response['success']) {
+  echo "Tu: " . $data['msg'] . PHP_EOL;
   echo "Respuesta de la IA: " . $response['response'] . PHP_EOL;
 } else {
   echo "Error de la API: " . ($response['response'] ?? 'Respuesta inválida') . PHP_EOL;
