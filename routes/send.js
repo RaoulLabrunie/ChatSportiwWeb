@@ -2,13 +2,7 @@ import express from "express";
 import { main, errorHandler } from "../src/chat/LLM.js";
 import { schema } from "../src/chat/DB.js";
 import { history, addToHistory } from "../src/chat/history.js";
-import { hasChatAccessAPI } from "../middlewares/auth.js";
-import { sendMensajeMetadata } from "../src/auth/metadata.js";
-
 const router = express.Router();
-
-// Aplicar middleware de verificación para API
-router.use(hasChatAccessAPI);
 
 // Ruta principal
 router.post("/", async (req, res) => {
@@ -18,13 +12,6 @@ router.post("/", async (req, res) => {
     const finalAnswerFromAI = await main(message, schema, history);
 
     addToHistory(message, finalAnswerFromAI.humanFriendlyAnswer);
-
-    sendMensajeMetadata(
-      req,
-      message,
-      finalAnswerFromAI.queryFromAI,
-      finalAnswerFromAI.humanFriendlyAnswer
-    );
 
     // ✅ Respuesta en JSON
     res.json({
