@@ -209,28 +209,35 @@ Hope it was helpful! <br />
 ```
 ChatSportiwWeb/
 ├── bin/                    # Binary executable files
+|
+|-- middlewares/
+|   └── auth.js
+|
 ├── node_modules/           # Node.js dependencies
+|
 ├── public/                 # Static assets
-│   ├── images/             # Image assets
 │   ├── javascripts/        # Client-side scripts
 │   └── stylesheets/        # CSS styling files
-│       ├── styleMobile.css # Mobile-specific styles
-│       └── stylePC.css     # Desktop-specific styles
+│       ├── chat.css        # Mobile-specific styles
+│       └── paginaSinChat.css  # Desktop-specific styles
+|
 ├── routes/                 # Express route handlers
 │   ├── auth.js             # Authentication routes
 │   ├── chat.js             # Chat functionality routes
 │   ├── index.js            # Main application routes
 │   ├── noChat.js           # Non-chat routes
-│   ├── send.js             # Message sending handlers
-│   └── users.js            # User management routes
+│   └── send.js             # Message sending handlers
+|
 ├── src/                    # Source code
 │   ├── auth/               # Authentication logic
-│   │   └── DB2.js          # Database auth interface
+│   │   |-- login.js        # Database auth interface
+|   |   └── metadata.js         # Database metadata interface
 │   ├── chat/               # Chat functionality
 │   │   ├── DB.js           # Database chat interface
 │   │   ├── history.js      # Chat history management
 │   │   └── LLM.js          # LLM integration service
 │   └── views/              # View templates
+|
 ├── .env                    # Environment variables
 ├── .gitignore              # Git ignore file
 ├── app.js                  # Main application entry point
