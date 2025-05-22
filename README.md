@@ -101,7 +101,7 @@ The API exposes a single POST endpoint at `/send`:
 
 ```php
 <?php
-$url = 'http://localhost:3000/send'; 
+$url = 'http://localhost:3000/send';
 $data = ['msg' => 'Give me French players under 25 years old'];
 
 $options = [
@@ -133,20 +133,23 @@ if (isset($response['success']) && $response['success']) {
 
 ```
 ChatSportiwAPI/
-├── node_modules/           # Node.js dependencies
-├── src/                    # Source code
-│   └── chat/               # Chat functionality
-│       ├── DB.js           # Database interface
-│       ├── history.js      # Conversation history management
-│       └── LLM.js          # LLM integration service
-├── routes/                 # Express route handlers
-│   └── send.js             # Message handling route
-├── .env                    # Environment variables
-├── .gitignore              # Git ignore file
-├── app.js                  # Main application entry point
-├── package-lock.json       # Dependency lock file
-├── package.json            # Project metadata
-└── README.md               # Project documentation
+├── bin/
+├── php/                            # API call proxy
+│   ├── main.php
+│   └── responsive_chat.html
+├── routes/                         # Express route handlers
+│   └── send.js
+├── src/
+│   └── chat/                       # Chat functionality
+│       ├── DB.js                   # Database interface
+│       ├── history.js              # Conversation history management
+│       └── LLM.js                  # Language model (LLM) integration
+├── .env                            # Environment variables
+├── .gitignore                      # Files/Directories ignored by Git
+├── app.js                          # Main application entry point
+├── package-lock.json               # Dependency lock file
+├── package.json                   # Project metadata and dependencies
+└── README.md                      # Project documentation
 ```
 
 ## 📋 Requirements
