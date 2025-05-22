@@ -60,5 +60,4 @@ typings/
 # next.js build output
 .next
 
-# archivo preguntas
-preguntas.md
+pruebas/pruebas.js

@@ -7,6 +7,10 @@
 import app from "../app.js";
 import debugLib from "debug";
 import http from "http";
+import dotenv from "dotenv";
+
+// Configurar dotenv para cargar variables de entorno desde .env
+dotenv.config();
 
 const debug = debugLib("expresschatbot:server");
 /**
@@ -36,17 +40,8 @@ server.on("listening", onListening);
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
+  if (isNaN(port)) return val;
+  if (port >= 0) return port;
   return false;
 }
 
@@ -84,4 +79,5 @@ function onListening() {
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
+  console.log(`Server running on ${bind}`);
 }

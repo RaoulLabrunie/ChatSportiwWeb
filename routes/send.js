@@ -1,29 +1,39 @@
 import express from "express";
-import { main, errorHandler } from "../public/javascript/LLM.js";
-import { getSchema } from "../public/javascript/DB.js";
+import { main, errorHandler } from "../src/chat/LLM.js";
+import { schema } from "../src/chat/DB.js";
+import { history, addToHistory } from "../src/chat/history.js";
+import { hasChatAccessAPI } from "../middlewares/auth.js";
+import { sendMensajeMetadata } from "../src/auth/metadata.js";
+
 const router = express.Router();
 
-let history = []; //variable que almacenara el mensaje que sera la request pero solo queremos el body
-const gettingSchema = await getSchema();
-
-//llm solo procesa json en string, por ende
-
-const schema = JSON.stringify(gettingSchema);
-
-console.log(schema);
+// Aplicar middleware de verificación para API
+router.use(hasChatAccessAPI);
 
 // Ruta principal
 router.post("/", async (req, res) => {
   const { msg: message } = req.body; //obtenemos el mensaje enviado por el usuario
 
   try {
-    //intentamos ejecutar la consulta en la base de datos en caso de que de error se informara al usuario
-    const formattedResponse = await main(message, schema, history); //llamamos a la funcion main
-    res.send(`<ul>${formattedResponse}</ul>`); //enviamos la respuesta formateada en HTML
+    const finalAnswerFromAI = await main(message, schema, history); //Esta funcion se encuentra en ../src/chat/javascript/LLM.js\
+
+    addToHistory(message, finalAnswerFromAI.humanFriendlyAnswer); //agregamos el mensaje al historial, esto se encuentra en ../src/chat/javascript/history.js
+
+    sendMensajeMetadata(
+      req,
+      message,
+      finalAnswerFromAI.queryFromAI,
+      finalAnswerFromAI.humanFriendlyAnswer
+    ); //Esta funcion se encuentra en ../src/auth/metadata.js
+
+    res.send(`<ul>${finalAnswerFromAI.humanFriendlyAnswer}</ul>`);
   } catch (error) {
-    const errorAnswer = await errorHandler(message, error);
-    res.send(`<ul>${errorAnswer}</ul>`);
     console.error("Error procesando la consulta:", error);
+
+    const errorAnswer = await errorHandler(message, history); //Esta funcion se encuentra en ../src/chat/javascript/LLM.js
+    addToHistory(message, errorAnswer); //agregamos el mensaje al historial
+
+    res.send(`<ul>${errorAnswer}</ul>`);
   }
 });
 

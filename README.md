@@ -1,80 +1,255 @@
-# Welcome to my project!
+# 🤖 ChatSportiwWeb
 
-### It allows users to make questions about a database of your choice to a llm and using a prompt and the schema of the database it will generate a SQL query to answer the question, the program will execute the query to the database.
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/GPL-3.0-green)
 
-### Another chat bot will translate the SQL result in a human way and in the same language of the question.
+> A natural language interface for database queries that translates user questions into SQL and presents results in a human-friendly format.
 
-### It's important to understand that you must modify the prompt to match your specific needs.
+## ✨ Overview
 
-### The chatbot is powered by LangChain and uses the ChatGroq model(llama3-70b-8192) to generate the SQL query, though you can use any other model you want.
+**ChatSportiwWeb** transforms the way you interact with databases through natural language. The system:
 
-## Features
+1. 💬 Takes user questions about database content
+2. 🔄 Converts these questions to SQL queries using LLM technology
+3. ⚡ Executes the queries against your database
+4. 📊 Translates the results back into natural language responses
 
-- Chatbot functionality
-- Database integration
-- SQL query generation
-- Response formatting
+Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power of conversational AI to your data infrastructure. Customize with any compatible LLM of your choice.
 
-## Installation
+## 🌟 Features
 
-1. Clone the repository:
+- **Natural Language Interface**: Ask questions about your data in plain language
+- **SQL Query Generation**: Automatically creates optimized SQL from natural language
+- **Database Integration**: Connect to your existing database
+- **Smart Response Formatting**: Presents results in human-readable format
+- **Multilingual Support**: Responds in the same language as the question
+- **Secure Authentication**: Login system restricts access to authorized users only
+- **Permission-Based Access**: Users can only access chats based on their database permissions
 
-```bash
-git clone https://github.com/raull/ExpressChatBot.git
+## 🚀 Installation
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/raull/ChatSportiwWeb.git
+   cd ChatSportiwWeb
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**:
+   Create a `.env` file in the project root with the following:
+
+   ```
+   GROQ_API_KEY=your_api_key
+
+   # Main database connection
+   DB_HOST=localhost
+   DB_USER=user
+   DB_PASSWORD=userPassword
+   DB_NAME=ChatSportiwWeb
+   DB_PORT=3306
+
+   # Login database connection
+   LOGIN_DB_HOST=localhost
+   LOGIN_DB_USER=login_user
+   LOGIN_DB_PASSWORD=loginPassword
+   LOGIN_DB_NAME=logindb
+   LOGIN_DB_PORT=3306
+
+
+   #Metadata database connection
+   METADATA_DB_HOST=localhost
+   METADATA_DB_USER=metadata_user
+   METADATA_DB_PASSWORD=metadataPassword
+   METADATA_DB_NAME=metadatadb
+   METADATA_DB_PORT=3306
+   ```
+
+4. **Start the server**:
+   ```bash
+   npm run start
+   ```
+
+## ⚙️ Customization
+
+### Authentication Setup
+
+The authentication system is implemented in `src/auth/DB2.js`. The login process works as follows:
+
+1. The user enters their credentials on the login page
+2. The system verifies the user exists in the authentication database
+3. The system checks the user's rank/permission level in the database
+4. **Access control**: Users with a rank greater than 2 are granted access to the chat interface
+5. Users with insufficient privileges (rank ≤ 2) cannot view or access the chat functionality
+
+You can customize the authentication logic to work with your own database schema as long as you maintain this core rank-based permission verification. The minimum required structure should include user identification and a numeric rank field.
+
+### Chat Setup
+
+The chat functionality is implemented in `src/chat/LLM.js`. The chat process works as follows:
+
+1. The user submits a natural language question
+2. The system generates a SQL query from the question
+3. The system executes the query against the database
+4. The system returns the results in a human-readable format
+
+### Metadata
+
+The login will automatically send the users id, importance, date, device and browser. This information is stored in the metadata database. In chatmetadata.
+
+Each time the user sends a message, the system will send the message and the sql query to the metadata database. This information is stored in the mesagemetadata table.
+
+### DB structure examples
+
+```sql
+CREATE TABLE users(
+    user_id,
+    name,
+    email,
+    password
+);
+
+CREATE TABLE importance(
+    importance_id,
+    importance
+);
+
+CREATE TABLE chatmetadata(
+    chat_id,
+    user_id,
+    importance_id,
+    inDate,
+    device,
+    browser
+);
+
+CREATE TABLE mensajemetadata(
+    message_id,
+    user_id,
+    message,
+    extractedsql
+);
 ```
 
-2. Install dependencies:
+(just a little example of the database structure)
 
-```bash
-npm install
-```
+You can customize the chat logic to work with your own database schema and use case requirements. The system uses ChatGroq models (powered by llama3-70b-8192) for SQL generation, though you can configure any model of your choice. Feel fre to modify the prompt templates in `src/chat/LLM.js` to match your specific database schema and use case requirements.
 
-3. Configure the database connection and the LLM api key in the `.env` file:
+## 📝 Usage
 
-```
-GROQ_API_KEY=your_api_key
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=root
-DB_NAME=expresschatbot
-DB_PORT=3306
-```
+### Authentication Flow
 
-4. Start the server:
+1. Navigate to the login page
+2. Enter your username and password
+3. The system authenticates against the database in `src/auth/DB2.js`
+4. If authenticated, the system checks your user rank
+5. Only users with rank > 2 can access the chat interface
+6. Users with insufficient rank (≤ 2) will be denied access
 
-```
-npm start
-```
+### Chat Interaction
 
-## Usage
+Once authenticated with sufficient privileges:
 
-To use the chatbot, simply send a message to the server using a POST request. The server will respond with a list of players that match the query.
+1. Use the web interface to submit natural language questions
+2. The system generates a SQL query from your question
+3. Executes it against the database
+4. Returns the results in a human-readable format
 
-For example, to get a list of players with a height greater than 200 and a free throw statistic greater than 50, you can send the following message:
+To access the chat functionality, users must:
 
-```
-Give me 10 players who have played in NCAA wich height is higher than 2 meters and a free throw statistic greater than 50?
-```
+- Have a valid account in the authentication database
+- Have a user rank greater than 2
 
-The server will respond with a list of players that match the query:
+### Example
+
+**User Query:**
 
 ```
-Heres the result from the database:
-[{"Firstname":"firstname","Lastname":"lastname","Height":2.0,"GameFreeThrowsStatistic":50,"link":"https://sportiw.com/en/athletes/firstname%20lastname/bjse1a360bfb50jy3voy/"}]
-```
 
-Then another chatbot will translate the result in a human way:
+Give me 10 players who have played in NCAA with height greater than 2 meters and a free throw statistic greater than 50?
 
 ```
-Here are the 10 players you requested: <br>
-- <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
-- etc <br>
-Hope it was helpful! <br>
+
+**Database Result:**
+
+```json
+[
+  {
+    "Firstname": "firstname",
+    "Lastname": "lastname",
+    "Height": 2.0,
+    "GameFreeThrowsStatistic": 50,
+    "link": "https://sportiw.com/en/athletes/firstname%20lastname/bjse1a360bfb50jy3voy/"
+  }
+  // Additional players...
+]
 ```
 
-Then the js on the pug page will show the results following the format for an HTML.
+**Formatted Response:**
 
-Here is an example of the output:
+```html
+Here are the 10 players you requested: <br />
+- <a href="player.link" target="_blank">player.Firstname player.Lastname</a>
+<br />
+- [Additional players listed here] <br />
+Hope it was helpful! <br />
+```
 
-![image](https://github.com/user-attachments/assets/f5fc0d3c-2c46-4915-9742-7fab8f929c25)
+## 🖼️ Example Output
 
+![Screenshot 2024-11-22 184101](https://github.com/user-attachments/assets/2411a5a5-27c1-48e7-bfbd-4995e8aec211)
+
+## 🗂️ Project Structure
+
+```
+ChatSportiwWeb/
+├── bin/                    # Binary executable files
+├── node_modules/           # Node.js dependencies
+├── public/                 # Static assets
+│   ├── images/             # Image assets
+│   ├── javascripts/        # Client-side scripts
+│   └── stylesheets/        # CSS styling files
+│       ├── styleMobile.css # Mobile-specific styles
+│       └── stylePC.css     # Desktop-specific styles
+├── routes/                 # Express route handlers
+│   ├── auth.js             # Authentication routes
+│   ├── chat.js             # Chat functionality routes
+│   ├── index.js            # Main application routes
+│   ├── noChat.js           # Non-chat routes
+│   ├── send.js             # Message sending handlers
+│   └── users.js            # User management routes
+├── src/                    # Source code
+│   ├── auth/               # Authentication logic
+│   │   └── DB2.js          # Database auth interface
+│   ├── chat/               # Chat functionality
+│   │   ├── DB.js           # Database chat interface
+│   │   ├── history.js      # Chat history management
+│   │   └── LLM.js          # LLM integration service
+│   └── views/              # View templates
+├── .env                    # Environment variables
+├── .gitignore              # Git ignore file
+├── app.js                  # Main application entry point
+├── dockerfile              # Docker configuration
+├── package-lock.json       # Dependency lock file
+├── package.json            # Project metadata
+└── README.md               # Project documentation
+```
+
+## 📋 Requirements
+
+- Node.js v14 or higher
+- MySQL database (or compatible alternative)
+  - Main database for chat functionality
+  - Authentication database for user management and permissions
+- API key for your chosen LLM provider
+
+---
+
+<div align="center">
+  Made with ❤️ by Raoul
+</div>

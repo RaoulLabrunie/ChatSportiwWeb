@@ -1,0 +1,134 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  background-color: #f8f9fa;
+}
+
+/* Card styling enhancements */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  font-weight: bold;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 0.75rem 1rem;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+.btn-read {
+  border-radius: 20px;
+  padding: 0.25rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-read:hover {
+  transform: scale(1.05);
+}
+
+.social-links a {
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
+  margin: 0 0.5rem;
+}
+
+.social-links a:hover {
+  color: #61dafb !important;
+}
+
+.featured-header {
+  background-color: #495057;
+  color: white;
+  padding: 0.7rem 1rem;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 767px) {
+  .container-wrapper {
+    padding: 0 12px;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .blog-header {
+    font-size: 1.5rem !important;
+    letter-spacing: 0.5px;
+  }
+
+  .section-title {
+    font-size: 1.2rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .card-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Ensure cards don't overflow */
+  .card {
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  /* Better spacing for mobile buttons */
+  .header-buttons .btn {
+    margin-left: 0.3rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Adjust paragraph text for better readability */
+  .card-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  /* Add more space between content sections */
+  .content-section {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Ensure proper spacing in footer */
+  .footer-content {
+    padding: 1rem 0;
+  }
+
+  /* Add better column spacing */
+  .post-column {
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 375px) {
+  .container-wrapper {
+    padding: 0 8px;
+  }
+
+  .blog-header {
+    font-size: 1.3rem !important;
+  }
+
+  .card-body {
+    padding: 0.8rem;
+  }
+}
