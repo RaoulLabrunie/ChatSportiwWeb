@@ -9,6 +9,8 @@ export function isAuthenticated(req, res, next) {
   }
 }
 
+
+
 // Middleware para verificar si el usuario tiene acceso al chat (importancia 2 o 3)
 export function hasChatAccess(req, res, next) {
   if (req.session && req.session.isLoggedIn) {

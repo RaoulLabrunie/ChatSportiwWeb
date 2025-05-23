@@ -60,4 +60,8 @@ typings/
 # next.js build output
 .next
 
+# excondemos los archivos de texto de los prompts
+iaSQL.txt
+iaFriendlyway.txt
+
 pruebas/pruebas.js

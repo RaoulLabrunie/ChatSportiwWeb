@@ -1,25 +1,26 @@
 extends layout
-//- Se toma como base la plantilla layout.pug
 
 block content
-  //- Meta viewport (imprescindible para responsividad)
   meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1.0")
   
   link(rel="stylesheet", href="/stylesheets/chat.css")
 
   body
     .container-fluid.d-flex.flex-column.vh-100.bg-light.p-0
-      //- Cabecera con padding reducido en móvil
-      .row.m-0.bg-primary.text-white.py-2.px-0
-        .col
+      // Cabecera con botones
+      .row.m-0.bg-primary.text-white.py-2.px-0.align-items-center
+        .col-6
           h1.text-center.mb-0.fs-4.chat-header Chatbot
-      
-      //- Área de mensajes (contenedor expandible)
+        .col-6.text-end.pe-3
+          a.btn.btn-light.btn-sm.me-2(href="/noChat") Volver
+          button#logoutBtn.btn.btn-danger.btn-sm LOGOUT
+
+      // Área de mensajes
       .row.m-0.flex-grow-1.overflow-auto.bg-white
         .col.px-0
           ul#messages.list-unstyled.p-2.p-sm-3.mb-0
       
-      //- Formulario fijo en la parte inferior con sombra
+      // Formulario de entrada
       .row.m-0.bg-white.py-3.chat-input-area
         .col.px-3
           form.d-flex.align-items-center
@@ -28,20 +29,18 @@ block content
               span.d-none.d-sm-inline.me-1 Send
               i.fas.fa-paper-plane
 
-    //- Template para mensajes del usuario
+    // Plantillas de mensajes
     template#userMsgTemplate
       li.message.mb-3.text-end
         .d-inline-block.bg-primary.text-white.p-2.rounded-3.mw-75
           p.content.m-0
 
-    //- Template para mensajes del sistema/bot
     template#systemMsgTemplate
       li.message.mb-3.text-start
         .d-inline-block.bg-light.p-2.rounded-3.mw-75
           span.role.d-block.text-muted.small.mb-1 System
           p.content.m-0
-          
-    //- Template para el indicador de carga
+
     template#loadingMsgTemplate
       li.message.mb-3.text-start.loading-message
         .d-inline-block.bg-light.p-2.rounded-3
@@ -50,6 +49,6 @@ block content
               span.visually-hidden Cargando...
             span Escribiendo...
 
-  //- Scripts necesarios
+  // Scripts necesarios
   script(src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js")
-  script(rel="javascript", src="/javascripts/chat.js")
+  script(src="/javascripts/chat.js")

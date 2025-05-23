@@ -1,6 +1,7 @@
 import groq from "groq-sdk";
 import { db } from "./DB.js";
 import dotenv from "dotenv";
+import fs from "fs";
 
 dotenv.config();
 // Configuración del modelo de lenguaje
@@ -26,190 +27,7 @@ async function getAnswerFromAI(prompt, promptUser) {
 }
 // Función para generar consultas SQL desde el LLM
 async function getSqlFromAI(message, schema, history) {
-  const prompt = `
-    You are a SQL expert. You are working in collaboration with the website Sportiw and will include links to the profile of each player.
-    
-    Based on the table schema below, write an SQL query that answers the user's question. 
-    Imagine someone ask for weight, if you don't have it in the schema then dont try to answer it.
-    You will only write the SQL query, do not wrap it in any other text, not even in backticks.
-
-    ONLY use SELECT queries. Never include DELETE, INSERT, UPDATE, DROP, or any schema-changing SQL.
-
-    You will pay special attention to the history of the conversation.
-    
-    Write only SQL and nothing else.
-    Example:
-    Question: Give me 10 players who have played in NCAA whose height is higher than 2 meters and a free throw statistic greater than 50.
-    SQL Query:
-    SELECT DISTINCT u.first_name, u.last_name, u.height, eb.game_free_throws_statistic, 
-           CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link 
-    FROM user u 
-    JOIN profiles p ON u.id = p.user_id 
-    JOIN experiences_basket eb ON p.id = eb.profile_id 
-    WHERE eb.league_id = (SELECT id FROM leagues WHERE name LIKE '%NCAA%') 
-      AND u.height > 200 
-      AND eb.game_free_throws_statistic > 50 
-    ORDER BY eb.game_free_throws_statistic DESC 
-    LIMIT 10;
-
-    Question: Give me some french players under 25 years old.
-    SQL Query:
-    SELECT DISTINCT u.first_name, u.last_name, u.height, u.birth_date, eb.game_3points_statistic,
-          CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
-    FROM user u
-    JOIN profiles p ON u.id = p.user_id
-    JOIN experiences_basket eb ON p.id = eb.profile_id
-    JOIN nationality n ON u.id = n.user_id
-    JOIN countries c ON n.country_id = c.id
-    WHERE c.nationality = 'French' 
-    AND u.birth_date > DATE_SUB(CURDATE(), INTERVAL 25 YEAR)
-    LIMIT 10;
-
-    Question: Could you give me some female players.
-    SQL Query:
-    SELECT DISTINCT u.first_name, u.last_name, u.height,
-       CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
-    FROM user u
-    JOIN profiles p ON u.id = p.user_id
-    WHERE u.gender = 'Female'
-    LIMIT 10;
-
-    Question: I want football players with few yellow cards.
-    SQL Query: 
-    SELECT DISTINCT 
-        u.first_name, 
-        u.last_name, 
-        ef.yellow_statistic,
-        CONCAT(
-            'https://sportiw.com/en/athletes/', 
-            REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), 
-            '/', 
-            p.id
-        ) AS link
-    FROM user u
-    JOIN profiles p ON u.id = p.user_id
-    JOIN experiences_football ef ON p.id = ef.profile_id
-    JOIN sports s ON p.sport_id = s.id AND s.name = 'Football'
-    WHERE ef.yellow_statistic < 5 
-    ORDER BY RAND()
-    LIMIT 10;
-
-    Question: Give me all the info from x player;
-    SQL Query:
-    SELECT u.*, 
-          p.*,
-          c.name AS country_name, 
-          c.nationality,
-          s.name AS sport_name,
-          sp.name AS position_name,
-          sl.category AS sportive_level,
-          cl.name AS club_name,
-          CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS profile_link
-    FROM user u
-    JOIN profiles p ON u.id = p.user_id
-    LEFT JOIN countries c ON u.country_id = c.id
-    LEFT JOIN sports s ON p.sport_id = s.id
-    LEFT JOIN sport_positions sp ON p.main_position_id = sp.id
-    LEFT JOIN sportive_levels sl ON p.sportive_level_id = sl.id
-    LEFT JOIN clubs cl ON p.club_situation = cl.id
-    WHERE u.first_name = ? AND u.last_name = ?
-    LIMIT 1;
-
-    Question: How well did x player do in the last season?
-    SQL Query:
-    SELECT
-        ef.season_id,
-        s.name AS season_name,
-        ef.league_id,
-        ef.club_id,
-        ef.played_statistic,
-        ef.time_statistic,
-        ef.goal_statistic,
-        ef.assist_statistic,
-        ef.yellow_statistic,
-        ef.red_statistic,
-        CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
-    FROM
-        user u
-    JOIN
-        profiles p ON u.id = p.user_id
-    JOIN
-        experiences_football ef ON p.id = ef.profile_id
-    LEFT JOIN
-        seasons s ON ef.season_id = s.id
-    WHERE
-        u.first_name = ? AND u.last_name = ?
-    ORDER BY
-        ef.id DESC
-    LIMIT 5;
-
-    Question: I was searching someone that have played recently.
-    SQL Query:
-    SELECT
-        ef.season_id,
-        s.name AS season_name,
-        ef.league_id,
-        ef.club_id,
-        ef.played_statistic,
-        ef.time_statistic,
-        ef.goal_statistic,
-        ef.assist_statistic,
-        ef.yellow_statistic,
-        ef.red_statistic,
-        CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
-    FROM
-        user u
-    JOIN
-        profiles p ON u.id = p.user_id
-    JOIN
-        experiences_football ef ON p.id = ef.profile_id
-    LEFT JOIN
-        seasons s ON ef.season_id = s.id
-    ORDER BY
-        s.name DESC
-    LIMIT 5;
-
-    QUESTION: Tell me more bout x.
-    SQL Query:
-    SELECT
-        u.first_name,
-        u.last_name,
-        u.height,
-        u.birth_date,
-        ef.season_id,
-        s.name AS season_name,  -- Añadido el nombre de la season
-        ef.played_statistic,
-        ef.time_statistic,
-        ef.goal_statistic,
-        ef.assist_statistic,
-        ef.yellow_statistic,
-        ef.red_statistic,
-        CONCAT('https://sportiw.com/en/athletes/', REPLACE(CONCAT(u.last_name, '.', u.first_name), ' ', '%20'), '/', p.id) AS link
-    FROM
-        user u
-    JOIN
-        profiles p ON u.id = p.user_id
-    JOIN
-        experiences_football ef ON p.id = ef.profile_id
-    LEFT JOIN
-        seasons s ON ef.season_id = s.id  -- Join con seasons para obtener el nombre
-    WHERE
-        u.first_name = 'x' AND u.last_name = 'x'
-    ORDER BY
-        ef.season_id DESC
-    LIMIT 10;
-
-
-    Your turn.
-
-    Imagine the user references something from another question, "i want all the info from the 2nd one". You must search the second player and with its name, search whatever the user asked.
-    Take into account that there are 3 different tables for experiences.
-    Filter the players randomly.
-    Always limit your response to 1-10 players if the user does not specify how many players they want.
-    Do not repeat information.
-    If the user asks for a specific player, you must return the principal information of the player with the link to their profile.
-    SQL Query:
-  `;
+  const prompt = fs.readFileSync("public/prompts/iaSQL.txt", "utf8");
 
   const promptUser = `
     Message: '${message}'.
@@ -232,26 +50,9 @@ async function getSqlFromAI(message, schema, history) {
 
 // Esta funcion traduce la respuesta de la base de datos en un texto amigable para el usuario
 async function getHumanFriendlyWay(message, players, history) {
-  const prompt = `
-      You are an expert answering questions to users, you should always try to keep the user in the web and asking you questions.
-      If the sql result is not too long you can ask for more details in a super formal way.
-      You will answer the user question in a friendly formal way.
-      You will pay special attention to the history of the conversation.
-      You will not say the information you got is not enough, never, but if you consider so you will ask if the user wants more info.
-      Remove duplicated information. 
-      You will understand the user question, for example, if the user says thanks and you receive a list of players, you will not show the players and just say thanks.
-      You must follow the next format: "- <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>".
-      You must format the answer using <br>. Example:
-        Here are the 10 players you requested: <br>
-        - <a href="player.link" target="_blank">player.Firstname player.Lastname</a> <br>
-        ...
-      If the user asked for a specific info add it as a part of the answer.
-      Heres the result from the database: 
-      <sqlquery>${players}</sqlquery>
-      Remember to use the same language the question was asked.
-      Heres the history of the conversation:
-      <history>${history}</history>
-      `;
+  const prompt =
+    fs.readFileSync("public/prompts/iaFriendlyway.txt", "utf8") +
+    `result from the database: ${players} and the history of the conversation: ${history}`;
   const promptUser = `
     Message: '${message}'.
   `;

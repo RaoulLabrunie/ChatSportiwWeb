@@ -10,7 +10,29 @@ document.addEventListener("DOMContentLoaded", function () {
   const systemMsgTemplate = document.querySelector("#systemMsgTemplate");
   const loadingMsgTemplate = document.querySelector("#loadingMsgTemplate");
 
+  var logoutButton = document.getElementById("logoutBtn");
+
   let loadingMessageElement = null;
+
+  if (logoutButton) {
+    logoutButton.onclick = function (e) {
+      e.preventDefault();
+
+      fetch("/api/is-authenticated")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.authenticated) {
+            fetch("/logout").then((response) => {
+              if (response.ok) {
+                window.location.href = "/";
+              }
+            });
+          } else {
+            window.location.href = "/login";
+          }
+        });
+    };
+  }
 
   // Evento de envío de mensaje
   form.addEventListener("submit", async (event) => {

@@ -1,134 +1,179 @@
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow-x: hidden;
-  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
 }
 
-/* Card styling enhancements */
-.card {
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
+/* Hero container con gradiente similar a la imagen */
+.hero-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  position: relative;
 }
 
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+/* Efecto de ondas de fondo */
+.hero-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
-.card-header {
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 2rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
   font-weight: bold;
-  border-radius: 8px 8px 0 0 !important;
-  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.card-body {
-  padding: 1.25rem;
+.hero-subtitle {
+  font-size: 1.8rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+  color: #f8f9fa;
 }
 
-.btn-read {
-  border-radius: 20px;
-  padding: 0.25rem 1rem;
-  transition: all 0.3s ease;
+.hero-description {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.btn-read:hover {
-  transform: scale(1.05);
+/* Botones principales */
+.button-container {
+  margin-top: 2rem;
 }
 
-.social-links a {
+.main-btn {
+  background: white;
+  border: none;
+  border-radius: 50px;
+  padding: 1rem 2.5rem;
   font-size: 1.2rem;
-  transition: color 0.3s ease;
-  margin: 0 0.5rem;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.social-links a:hover {
-  color: #61dafb !important;
+.main-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
-.featured-header {
-  background-color: #495057;
+.main-btn i {
+  font-size: 1.1rem;
+}
+
+/* Estado de login/logout */
+.login-btn.logged-in {
+  background: #dc3545;
   color: white;
-  padding: 0.7rem 1rem;
-  border-radius: 8px 8px 0 0;
 }
 
-/* Mobile-specific adjustments */
-@media (max-width: 767px) {
-  .container-wrapper {
-    padding: 0 12px;
+.login-btn.logged-in:hover {
+  background: #c82333;
+}
+
+.chat-btn {
+  background: #28a745;
+  color: white;
+}
+
+.chat-btn:hover {
+  background: #218838;
+}
+
+/* Sección de logos */
+.trusted-section {
+  position: relative;
+  z-index: 2;
+}
+
+.logos-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.logo-item {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s ease;
+}
+
+.logo-item:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
   }
 
-  .card-body {
+  .hero-subtitle {
+    font-size: 1.4rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .main-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    min-width: 160px;
+  }
+
+  .hero-content {
     padding: 1rem;
   }
 
-  .btn-sm {
-    padding: 0.25rem 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .blog-header {
-    font-size: 1.5rem !important;
-    letter-spacing: 0.5px;
-  }
-
-  .section-title {
-    font-size: 1.2rem !important;
-    margin-bottom: 0 !important;
-  }
-
-  .card-title {
-    font-size: 1.1rem !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  /* Ensure cards don't overflow */
-  .card {
-    max-width: 100%;
-    margin-bottom: 1rem;
-  }
-
-  /* Better spacing for mobile buttons */
-  .header-buttons .btn {
-    margin-left: 0.3rem;
-    padding: 0.25rem 0.5rem;
-  }
-
-  /* Adjust paragraph text for better readability */
-  .card-text {
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-
-  /* Add more space between content sections */
-  .content-section {
-    margin-bottom: 1.5rem;
-  }
-
-  /* Ensure proper spacing in footer */
-  .footer-content {
-    padding: 1rem 0;
-  }
-
-  /* Add better column spacing */
-  .post-column {
-    padding-bottom: 0.5rem;
+  .logo-icon {
+    font-size: 2rem;
   }
 }
 
-/* Small phones */
-@media (max-width: 375px) {
-  .container-wrapper {
-    padding: 0 8px;
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 2rem;
   }
 
-  .blog-header {
-    font-size: 1.3rem !important;
+  .hero-subtitle {
+    font-size: 1.2rem;
   }
 
-  .card-body {
-    padding: 0.8rem;
+  .main-btn {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .button-container {
+    width: 100%;
+    padding: 0 1rem;
   }
 }

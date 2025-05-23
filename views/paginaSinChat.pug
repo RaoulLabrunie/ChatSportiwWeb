@@ -7,74 +7,37 @@ block content
   //- Custom styles mejorados para responsividad
   link(rel="stylesheet", href="/stylesheets/paginaSinChat.css")
     
+  //- Main hero section
+  .hero-container.d-flex.flex-column.justify-content-center.align-items-center.min-vh-100
+    .hero-content.text-center.text-white
+      h1.hero-title.mb-3 My Tech Blog
+      p.hero-subtitle.mb-5 Encuentra el contenido perfecto ahora
+      p.hero-description.mb-5 Explora artículos sobre tecnología, programación y las últimas tendencias en desarrollo.
+      
+      //- Botones principales
+      .button-container.d-flex.flex-column.flex-md-row.gap-4.justify-content-center.align-items-center
+        button#loginBtn.main-btn.login-btn
+          i.fas.fa-sign-in-alt.me-2
+          span Login
+        button#chatBtn.main-btn.chat-btn
+          i.fas.fa-comments.me-2
+          span Chat
 
-  //- Main container con wrapper para mejor control de márgenes
-  .container-fluid.d-flex.flex-column.min-vh-100.bg-light.p-0
-    //- Header mejorado con mejor contraste
-    .row.m-0.bg-primary.text-white.py-2.px-0
-      .col-7.col-sm-8
-        h1.text-center.blog-header.mb-0 My Tech Blog
-      .col-5.col-sm-4.d-flex.justify-content-end.align-items-center.header-buttons.pe-2
-        a.btn.btn-outline-light.btn-sm.me-1.me-sm-2(href="/login") 
-          i.fas.fa-sign-in-alt.d-inline.d-md-none
-          span.d-none.d-md-inline Login
-        a.btn.btn-outline-light.btn-sm(href="/chat") 
-          i.fas.fa-comments.d-inline.d-md-none
-          span.d-none.d-md-inline Chat
-
-    //- Main Content Area con mejor espaciado
-    .row.m-0.flex-grow-1.bg-white
-      .col-12.col-lg-10.offset-lg-1.py-3.container-wrapper
-        //- Featured Post con mejor diseño
-        .card.mb-4.content-section
-          .card-header.featured-header
-            h2.section-title.mb-0 Featured Post
-          .card-body
-            h3.card-title.fs-5 Exploring the Future of AI
-            p.card-text.text-muted.small By John Doe | Published on May 12, 2025
-            p.card-text
-              | Artificial Intelligence continues to revolutionize industries, from healthcare to technology. 
-              | In this post, we dive deep into the latest advancements and their potential impact on our daily lives.
-            a.btn.btn-primary.btn-sm.btn-read.mt-2(href="#") Read More
-
-        //- Recent Posts Section con mejor espaciado
-        .row.g-3
-          .col-12.col-md-6.post-column
-            .card.h-100
-              .card-header Web Development
-              .card-body
-                h4.card-title.fs-5 JavaScript Frameworks in 2025
-                p.card-text.small
-                  | A comprehensive look at the most popular JavaScript frameworks 
-                  | and how they're shaping modern web development.
-                .d-flex.justify-content-between.align-items-center.mt-3
-                  small.text-muted By Sarah Smith
-                  a.btn.btn-sm.btn-outline-primary.btn-read(href="#") Read
-
-          .col-12.col-md-6.post-column
-            .card.h-100
-              .card-header Machine Learning
-              .card-body
-                h4.card-title.fs-5 Neural Networks Explained
-                p.card-text.small
-                  | Breaking down the complex world of neural networks 
-                  | and their applications in modern technology.
-                .d-flex.justify-content-between.align-items-center.mt-3
-                  small.text-muted By Alex Johnson
-                  a.btn.btn-sm.btn-outline-primary.btn-read(href="#") Read
-
-    //- Footer mejorado
-    .row.m-0.bg-dark.text-white.py-3
-      .col.text-center.footer-content
-        p.mb-2.small © 2025 Tech Insights Blog | All Rights Reserved
-        .social-links.d-flex.justify-content-center.mt-2
-          a.text-white(href="#") 
-            i.fab.fa-twitter
-          a.text-white(href="#") 
-            i.fab.fa-linkedin
-          a.text-white(href="#") 
-            i.fab.fa-github
+    //- Logos de empresas (opcional, similar a la imagen)
+    .trusted-section.mt-5.pt-5
+      p.text-white-50.mb-4 Confiado por desarrolladores desde 2020
+      .logos-container.d-flex.flex-wrap.justify-content-center.align-items-center.gap-4.opacity-75
+        .logo-item
+          i.fab.fa-js-square.logo-icon
+        .logo-item
+          i.fab.fa-react.logo-icon
+        .logo-item
+          i.fab.fa-node-js.logo-icon
+        .logo-item
+          i.fab.fa-python.logo-icon
+        .logo-item
+          i.fab.fa-github.logo-icon
 
   //- Scripts y FontAwesome
-  link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css")
-  script(rel="javascript", src="/javascripts/paginaSinChat.js")
+  link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+  script(src="/javascripts/paginaSinChat.js")

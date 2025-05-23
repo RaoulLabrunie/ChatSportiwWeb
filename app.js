@@ -36,10 +36,14 @@ app.use(
     secret: "chatbot",
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 15/*minutos*/ * 60 * 1000 }, // 15 minutos
+    cookie: { maxAge: 15 /*minutos*/ * 60 * 1000 }, // 15 minutos
   })
 );
 
+// Ruta para verificar autenticación desde el cliente
+app.get("/api/is-authenticated", (req, res) => {
+  res.json({ authenticated: req.session?.isLoggedIn || false });
+});
 
 // Middleware para verificar la IP - se aplica antes de las rutas
 app.use(function (req, res, next) {
@@ -121,3 +125,4 @@ app.use(function (err, req, res, next) {
 });
 
 export default app;
+export { activeIPs };
