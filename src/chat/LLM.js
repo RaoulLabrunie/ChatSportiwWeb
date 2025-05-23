@@ -42,6 +42,7 @@ async function getSqlFromAI(message, schema, history) {
       ${history}
     </history>
   `;
+  
 
   const sqlQueryFromAI = await getAnswerFromAI(prompt, promptUser);
 
