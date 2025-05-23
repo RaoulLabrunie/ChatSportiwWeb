@@ -70,7 +70,12 @@ Built on ChatGroq (powered by llama3-70b-8192), ChatSportiwWeb brings the power 
    METADATA_DB_PORT=3306
    ```
 
-4. **Start the server**:
+4. **Add your prompts to the public/prompts folder**
+
+   - iaSQL.txt (example)
+   - iaFriendlyway.txt (example)
+
+5. **Start the server**:
    ```bash
    npm run start
    ```
