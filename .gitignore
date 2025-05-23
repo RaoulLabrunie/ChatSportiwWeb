@@ -61,3 +61,7 @@ typings/
 .next
 
 pruebas/pruebas.js
+
+# prompts
+iaSQL.txt
+iaFriendlyway.txt
