@@ -27,22 +27,21 @@ async function getAnswerFromAI(prompt, promptUser) {
 }
 // Función para generar consultas SQL desde el LLM
 async function getSqlFromAI(message, schema, history) {
-  const prompt = fs.readFileSync("public/prompts/iaSQL.txt", "utf8");
+  const prompt =
+    fs.readFileSync("public/prompts/iaSQL.txt", "utf8") +
+    `This is the schema of the tables. You must use it to write the SQL query:
+  <schema>
+    ${schema}
+  </schema>
+
+  This is the history of the conversation:
+  <history>
+    ${history}
+  </history>`;
 
   const promptUser = `
     Message: '${message}'.
-
-    This is the schema of the tables. You must use it to write the SQL query:
-    <schema>
-      ${schema}
-    </schema>
-
-    This is the history of the conversation:
-    <history>
-      ${history}
-    </history>
   `;
-  
 
   const sqlQueryFromAI = await getAnswerFromAI(prompt, promptUser);
 
@@ -91,7 +90,6 @@ export async function main(message, schema, history) {
   // Generar la consulta SQL
   const queryFromAI = await getSqlFromAI(message, schema, history);
 
-  console.log(queryFromAI);
 
   // Extraer los valores y obtener la consulta parametrizada
   const { query: parameterizedQuery, values } = extractSqlValues(queryFromAI);

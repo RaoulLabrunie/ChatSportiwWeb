@@ -19,12 +19,16 @@ router.post("/", async (req, res) => {
 
     addToHistory(message, finalAnswerFromAI.humanFriendlyAnswer); //agregamos el mensaje al historial, esto se encuentra en ../src/chat/javascript/history.js
 
-    sendMensajeMetadata(
-      req,
-      message,
-      finalAnswerFromAI.queryFromAI,
-      finalAnswerFromAI.humanFriendlyAnswer
-    ); //Esta funcion se encuentra en ../src/auth/metadata.js
+    try {
+      await sendMensajeMetadata(
+        req,
+        message,
+        finalAnswerFromAI.queryFromAI,
+        finalAnswerFromAI.humanFriendlyAnswer
+      ); //Esta funcion se encuentra en ../src/auth/metadata.js
+    } catch (error) {
+      console.error("Error enviando metadata:", error);
+    }
 
     res.send(`<ul>${finalAnswerFromAI.humanFriendlyAnswer}</ul>`);
   } catch (error) {
