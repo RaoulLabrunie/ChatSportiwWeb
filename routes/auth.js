@@ -5,7 +5,7 @@ import { getLogin } from "../src/auth/login.js"; // adjust path as needed
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, timeZone, language } = req.body;
 
   try {
     const valid = await getLogin(email, password);
@@ -15,6 +15,8 @@ router.post("/login", async (req, res) => {
       req.session.isLoggedIn = true;
       req.session.user_id = valid.id_usuario;
       req.session.importancia = valid.importancia;
+      req.session.timeZone = timeZone;
+      req.session.language = language;
 
       sendMetadata(req);
 

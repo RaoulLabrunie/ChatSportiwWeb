@@ -3,11 +3,14 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   const email = document.querySelector("#email").value;
   const password = document.querySelector("#password").value;
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const language = navigator.language;
+
   if (email && password) {
     fetch("/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, timeZone, language }),
     })
       .then((response) => {
         // Check the response status

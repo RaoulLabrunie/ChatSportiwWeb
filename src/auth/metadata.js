@@ -19,6 +19,8 @@ export async function sendMetadata(req) {
   const inicio = Date.now();
   const id_usuario = req.session.user_id;
   const id_importancia = req.session.importancia;
+  const timeZone = req.session.timeZone;
+  const language = req.session.language;
 
   const source = req.headers["user-agent"];
   const ua = useragent.parse(source);
@@ -33,14 +35,22 @@ export async function sendMetadata(req) {
     : "Desconocido";
 
   await db2.query(
-    "INSERT INTO chatmetadata (id_usuario, id_importancia, entrada, dispositivo, navegador) VALUES (?, ?, ?, ?, ?)",
-    [id_usuario, id_importancia, inicio, dispositivo, navegador]
+    "INSERT INTO chatmetadata (id_usuario, id_importancia, entrada, dispositivo, navegador, timeZone, language) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      id_usuario,
+      id_importancia,
+      inicio,
+      dispositivo,
+      navegador,
+      timeZone,
+      language,
+    ]
   );
 }
 
 export async function sendMensajeMetadata(req, mensaje, sql, respuesta) {
   const id_usuario = req.session.user_id;
-  const mensajecompleto = mensaje + respuesta;
+  const mensajecompleto = `Usuario: ${mensaje} Bot: ${respuesta}`;
 
   console.log(sql);
 
